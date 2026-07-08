@@ -1,45 +1,18 @@
 import { Generations, Pokemon } from "@smogon/calc";
 import { describe, expect, it } from "vitest";
 
-import { CalcEngine } from "@/services/calcEngine";
-import type { Nature, StatKey } from "@/types/domain";
+import type { Nature, StatKey } from "@/core/domain/model";
+import { statAtLevel50 } from "@/core/domain/stats";
 
-describe("CalcEngine.calcDamage (dobles)", () => {
-  const engine = new CalcEngine();
-
-  it("Garchomp Earthquake vs Amoonguss coincide con @smogon/calc", () => {
-    const result = engine.calcDamage(
-      {
-        pokemon: "Garchomp",
-        level: 50,
-        nature: "Jolly",
-        evs: { atk: 252, spe: 252 },
-        item: "Life Orb",
-      },
-      { pokemon: "Amoonguss", level: 50, nature: "Calm", evs: { hp: 236, spd: 236 } },
-      "Earthquake",
-    );
-
-    expect(result.minDamage).toBe(109);
-    expect(result.maxDamage).toBe(130);
-    expect(result.minPct).toBe(49.8);
-    expect(result.maxPct).toBe(59.4);
-    expect(result.koChance).toContain("2HKO");
-    expect(result.desc).toContain("Garchomp");
-  });
-});
-
-describe("CalcEngine.statAtLevel50", () => {
-  const engine = new CalcEngine();
-
+describe("statAtLevel50 (fórmula pura de dominio)", () => {
   it("Garchomp Jolly 252 Spe = 169", () => {
-    expect(engine.statAtLevel50(102, 31, 252, "spe", "Jolly")).toBe(169);
+    expect(statAtLevel50(102, 31, 252, "spe", "Jolly")).toBe(169);
   });
 
   it("HP no se ve afectada por la naturaleza", () => {
     // Garchomp base HP 108: 0 EV -> 183, 4 EV -> 184
-    expect(engine.statAtLevel50(108, 31, 0, "hp", "Jolly")).toBe(183);
-    expect(engine.statAtLevel50(108, 31, 4, "hp", "Adamant")).toBe(184);
+    expect(statAtLevel50(108, 31, 0, "hp", "Jolly")).toBe(183);
+    expect(statAtLevel50(108, 31, 4, "hp", "Adamant")).toBe(184);
   });
 
   it("coincide con @smogon/calc para varias naturalezas/stats", () => {
@@ -60,7 +33,7 @@ describe("CalcEngine.statAtLevel50", () => {
         evs: { [c.stat]: c.ev },
       });
       const base = p.species.baseStats[c.stat];
-      const mine = engine.statAtLevel50(base, 31, c.ev, c.stat, c.nature);
+      const mine = statAtLevel50(base, 31, c.ev, c.stat, c.nature);
       expect(mine, `${c.name} ${c.nature} ${c.stat}`).toBe(p.stats[c.stat]);
     }
   });

@@ -1,7 +1,8 @@
-import type { Regulation, ThreatMon } from "@/types/domain";
+import type { Regulation, ThreatMon } from "@/core/domain/model";
+import type { MetaUsagePort } from "@/core/ports/metaUsagePort";
 
 /**
- * Datos de uso del meta por regulación (top de amenazas). (PLAN.md §3.)
+ * Adaptador estático de MetaUsagePort (dataset manual del top del meta).
  *
  * ⚠️ PLACEHOLDER: estos porcentajes son de EJEMPLO (no reales), con la forma
  * correcta, para programar y testear. Reemplazar por el top-30 real de M-B
@@ -48,7 +49,13 @@ const META: Record<string, ThreatMon[]> = {
   ],
 };
 
-/** Amenazas del meta cargadas para una regulación (sin ordenar). */
-export function getMeta(regulation: Regulation): ThreatMon[] {
-  return META[regulation] ?? [];
+export class StaticMetaAdapter implements MetaUsagePort {
+  topThreats(regulation: Regulation, limit = 30): ThreatMon[] {
+    return [...(META[regulation] ?? [])].sort((a, b) => b.usagePct - a.usagePct).slice(0, limit);
+  }
+
+  usage(pokemon: string, regulation: Regulation): ThreatMon | null {
+    const target = pokemon.toLowerCase();
+    return (META[regulation] ?? []).find((t) => t.pokemon.toLowerCase() === target) ?? null;
+  }
 }

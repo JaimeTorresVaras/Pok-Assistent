@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import type { CalcMon } from "@/services/calcEngine";
-import { CalcEngine } from "@/services/calcEngine";
-import { DexService } from "@/services/dexService";
-import { EVOptimizer, type Objective, type OptimizerMon } from "@/services/evOptimizer";
+import { PkmnPokedexAdapter } from "@/adapters/pkmn/pkmnPokedexAdapter";
+import { SmogonDamageCalcAdapter } from "@/adapters/smogon/smogonDamageCalcAdapter";
+import type { CalcMon } from "@/core/domain/model";
+import { EVOptimizer, type Objective, type OptimizerMon } from "@/core/usecases/optimizeEvs";
 
-const dex = new DexService();
-const calc = new CalcEngine();
-const opt = new EVOptimizer(dex, calc);
+const calc = new SmogonDamageCalcAdapter();
+const opt = new EVOptimizer(new PkmnPokedexAdapter(), calc);
 
 const garchomp: OptimizerMon = { pokemon: "Garchomp", nature: "Adamant", item: "Life Orb" };
 const amoonguss: OptimizerMon = { pokemon: "Amoonguss", nature: "Calm" };
@@ -53,7 +52,7 @@ describe("EVOptimizer — velocidad (fórmula pura, EVs exactos)", () => {
   });
 });
 
-describe("EVOptimizer — daño (vía @smogon/calc) + verificación", () => {
+describe("EVOptimizer — daño (vía DamageCalcPort) + verificación", () => {
   it("2HKO alcanzable a Amoonguss: lo cumple y se re-verifica", () => {
     const r = opt.optimize(
       garchomp,

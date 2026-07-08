@@ -1,10 +1,8 @@
-import type { CalcEngine, CalcMon } from "./calcEngine";
-import type { DexService } from "./dexService";
-import type { EVs, IVs, Nature, StatKey } from "@/types/domain";
-
-const MAX_EVS_PER_STAT = 252;
-const MAX_EVS_TOTAL = 508;
-const EV_STEP = 4;
+import { EV_STEP, MAX_EVS_PER_STAT, MAX_EVS_TOTAL } from "@/core/domain/evs";
+import type { CalcMon, EVs, IVs, Nature, StatKey } from "@/core/domain/model";
+import { statAtLevel50 } from "@/core/domain/stats";
+import type { DamageCalcPort } from "@/core/ports/damageCalcPort";
+import type { PokedexPort } from "@/core/ports/pokedexPort";
 
 /** El Pokémon que estamos optimizando (identidad + naturaleza/ítem/etc.). */
 export interface OptimizerMon {
@@ -57,14 +55,16 @@ export interface OptimizeResult {
 type FullEVs = Record<StatKey, number>;
 
 /**
- * EVOptimizer — resuelve EVs orientado a benchmarks (no fuerza bruta) y reparte
- * 508 EVs por prioridad, verificando cada objetivo sobre el spread real a
- * medida que lo construye. (PLAN.md §4, Fase 3.)
+ * Caso de uso: resolver EVs orientado a benchmarks (no fuerza bruta) y
+ * repartir 508 EVs por prioridad, verificando cada objetivo sobre el spread
+ * real a medida que se construye. (PLAN.md §4, Fase 3.)
+ *
+ * Solo depende de puertos: PokedexPort (stats base) y DamageCalcPort (daño).
  */
 export class EVOptimizer {
   constructor(
-    private readonly dex: DexService,
-    private readonly calc: CalcEngine,
+    private readonly pokedex: PokedexPort,
+    private readonly calc: DamageCalcPort,
   ) {}
 
   optimize(
@@ -72,7 +72,9 @@ export class EVOptimizer {
     objectives: Objective[],
     opts: { dumpStat?: StatKey } = {},
   ): OptimizeResult {
-    const base = this.dex.getBaseStats(mon.pokemon);
+    const species = this.pokedex.getSpecies(mon.pokemon);
+    if (!species) throw new Error(`EVOptimizer: Pokémon desconocido "${mon.pokemon}"`);
+    const base = species.baseStats;
     const evs: FullEVs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 
     const met: ObjectiveOutcome[] = [];
@@ -139,7 +141,7 @@ export class EVOptimizer {
   ): { ok: boolean; detail: string } {
     switch (objective.kind) {
       case "outspeed": {
-        const spe = this.calc.statAtLevel50(base.spe, iv(mon, "spe"), evs.spe, "spe", mon.nature);
+        const spe = statAtLevel50(base.spe, iv(mon, "spe"), evs.spe, "spe", mon.nature);
         return {
           ok: spe > objective.targetSpeed,
           detail: `Spe ${spe} vs objetivo ${objective.targetSpeed}`,

@@ -1,5 +1,7 @@
 /**
- * Tipos de dominio del sistema (ver PLAN.md §3 "Modelo de datos").
+ * Modelo de dominio (núcleo de la arquitectura hexagonal). Este archivo no
+ * depende de ningún framework ni librería: solo describe el problema.
+ * (PLAN.md §3 "Modelo de datos".)
  *
  * Todo está parametrizado por `Regulation`: el formato de Pokémon Champions
  * cambia cada pocos meses, así que el sistema debe poder cambiar de regulación
@@ -11,6 +13,9 @@ export type Regulation = string;
 
 /** Las seis estadísticas de un Pokémon. */
 export type StatKey = "hp" | "atk" | "def" | "spa" | "spd" | "spe";
+
+/** Orden canónico de las stats (el que usa el formato Showdown). */
+export const STAT_KEYS: readonly StatKey[] = ["hp", "atk", "def", "spa", "spd", "spe"];
 
 /** Las 25 naturalezas del juego. */
 export type Nature =
@@ -46,6 +51,17 @@ export type EVs = Partial<Record<StatKey, number>>;
 /** Reparto de IVs (0–31 por stat). Los stats omitidos se asumen 31. */
 export type IVs = Partial<Record<StatKey, number>>;
 
+/** Datos de una especie tal como los entrega la Pokédex. */
+export interface SpeciesInfo {
+  /** Identificador normalizado, p. ej. "landorustherian". */
+  id: string;
+  /** Nombre canónico, p. ej. "Landorus-Therian". */
+  name: string;
+  baseStats: Record<StatKey, number>;
+  types: string[];
+  abilities: string[];
+}
+
 /** Una entrada de uso: un nombre + su porcentaje de uso en el meta. */
 export interface UsageEntry {
   name: string;
@@ -60,10 +76,7 @@ export interface UsageSpread {
   pct: number;
 }
 
-/**
- * Amenaza del meta: lo que scrapeamos/mantenemos por cada Pokémon top.
- * (PLAN.md §3 "Amenaza del meta".)
- */
+/** Amenaza del meta: datos de uso de un Pokémon top. (PLAN.md §3.) */
 export interface ThreatMon {
   regulation: Regulation;
   pokemon: string;
@@ -75,10 +88,7 @@ export interface ThreatMon {
   teraTypes: UsageEntry[];
 }
 
-/**
- * Un set concreto de un Pokémon: parseado desde un paste de torneo con
- * `@pkmn/sets`, o propuesto por el sistema.
- */
+/** Un set concreto de un Pokémon (parseado de un paste o propuesto). */
 export interface PokemonSet {
   nature: Nature;
   item: string;
@@ -90,7 +100,7 @@ export interface PokemonSet {
 
 /**
  * Documento de torneo: unidad de ingesta del RAG (un registro por
- * Pokémon-en-equipo). (PLAN.md §3 "Documento de torneo".)
+ * Pokémon-en-equipo). (PLAN.md §3.)
  */
 export interface TournamentDoc {
   id: string;
@@ -110,7 +120,31 @@ export interface TournamentDoc {
   embedding?: number[];
 }
 
-/** Un objetivo (benchmark), marcado como verificado o no. */
+/** Un participante de un cálculo de daño (atacante o defensor). */
+export interface CalcMon {
+  pokemon: string;
+  level: number;
+  nature: Nature;
+  evs: EVs;
+  ivs?: IVs;
+  item?: string;
+  ability?: string;
+  teraType?: string;
+}
+
+/** Resultado de un cálculo de daño. */
+export interface DamageResult {
+  minDamage: number;
+  maxDamage: number;
+  minPct: number;
+  maxPct: number;
+  /** Texto de KO, p. ej. "99.6% chance to 2HKO" ("" si no aplica). */
+  koChance: string;
+  /** Descripción completa del cálculo ("" si no aplica). */
+  desc: string;
+}
+
+/** Un objetivo (benchmark), marcado como verificado o no por el motor. */
 export interface Benchmark {
   goal: string;
   target?: string;
@@ -123,6 +157,8 @@ export interface Recommendation {
   recommended: {
     nature: Nature;
     item: string;
+    ability?: string;
+    teraType?: string;
     evs: EVs;
     moves: string[];
   };

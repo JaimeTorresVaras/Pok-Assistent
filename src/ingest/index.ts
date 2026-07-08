@@ -4,9 +4,11 @@
  *
  *   fetch → parse → deduplicar/validar → recalcular usage → embeddings → resumen IA
  *
+ * En la arquitectura hexagonal esto es un adaptador de ENTRADA (driving,
+ * disparado por cron) que alimentará los adaptadores de datos (Fase 5).
  * Cada paso está como stub; se implementa en la Fase 5.
  */
-import type { Regulation, TournamentDoc } from "@/types/domain";
+import type { Regulation, TournamentDoc } from "@/core/domain/model";
 
 /** 1. Descarga team pastes nuevos de las fuentes (solo lo posterior a la marca). */
 export async function fetchNewPastes(regulation: Regulation, since?: string): Promise<string[]> {
