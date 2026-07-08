@@ -4,25 +4,35 @@ import { PkmnPokedexAdapter } from "@/adapters/pkmn/pkmnPokedexAdapter";
 import { StaticRegulationData } from "@/adapters/static/staticRegulationData";
 import { LegalityService } from "@/core/usecases/legality";
 
-describe("LegalityService", () => {
+describe("LegalityService (allowlist real de M-B: roster de Champions)", () => {
   const legality = new LegalityService(new PkmnPokedexAdapter(), new StaticRegulationData());
 
-  it("aplica la allowlist de M-B", () => {
+  it("acepta Pokémon del roster", () => {
     expect(legality.isLegal("Garchomp", "M-B")).toBe(true);
-    expect(legality.isLegal("Landorus-Therian", "M-B")).toBe(true); // nombre con guion
-    expect(legality.isLegal("Mewtwo", "M-B")).toBe(false); // existe pero no está permitido
-    expect(legality.isLegal("NoExiste-Fake", "M-B")).toBe(false); // ni siquiera existe
+    expect(legality.isLegal("Sinistcha", "M-B")).toBe(true);
+    // Staraptor no está en los juegos de gen 9 ("Past"), pero sí en Champions.
+    expect(legality.isLegal("Staraptor", "M-B")).toBe(true);
+  });
+
+  it("acepta megas/formas vía su especie base", () => {
+    expect(legality.isLegal("Charizard-Mega-Y", "M-B")).toBe(true);
+  });
+
+  it("rechaza Pokémon fuera del roster de Champions", () => {
+    expect(legality.isLegal("Amoonguss", "M-B")).toBe(false); // existe en gen 9, no en Champions
+    expect(legality.isLegal("Mewtwo", "M-B")).toBe(false);
+    expect(legality.isLegal("NoExiste-Fake", "M-B")).toBe(false);
   });
 
   it("una regulación sin datos no permite nada", () => {
     expect(legality.isLegal("Garchomp", "Z-Z")).toBe(false);
   });
 
-  it("listLegal devuelve nombres canónicos ordenados", () => {
+  it("listLegal devuelve las 209 especies del roster, ordenadas", () => {
     const legal = legality.listLegal("M-B");
     expect(legal).toContain("Garchomp");
-    expect(legal).toContain("Landorus-Therian");
-    expect(legal).toHaveLength(15); // tamaño del placeholder
+    expect(legal).toContain("Vileplume"); // novedad de M-B
+    expect(legal).toHaveLength(209);
     expect([...legal].sort()).toEqual(legal);
   });
 });

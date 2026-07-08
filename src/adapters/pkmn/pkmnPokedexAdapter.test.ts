@@ -24,6 +24,19 @@ describe("PkmnPokedexAdapter", () => {
     expect(dex.getSpecies("NoExiste-Fake")).toBeNull();
   });
 
+  it("resuelve Pokémon 'Past' (fuera de gen 9 pero en Champions)", () => {
+    expect(dex.getSpecies("Staraptor")?.name).toBe("Staraptor");
+    expect(dex.getSpecies("Aerodactyl")?.name).toBe("Aerodactyl");
+  });
+
+  it("resuelve megas y expone la especie base", () => {
+    const mega = dex.getSpecies("Charizard-Mega-Y");
+    expect(mega?.name).toBe("Charizard-Mega-Y");
+    expect(mega?.baseSpeciesId).toBe("charizard");
+    // Un no-forma tiene baseSpeciesId igual a su propio id.
+    expect(dex.getSpecies("Garchomp")?.baseSpeciesId).toBe("garchomp");
+  });
+
   it("getLearnset incluye movimientos legales en gen 9 (con prevos)", async () => {
     const moves = await dex.getLearnset("Garchomp");
     expect(moves).toContain("Earthquake");

@@ -15,7 +15,10 @@ export class LegalityService {
   isLegal(pokemon: string, regulation: Regulation): boolean {
     const species = this.pokedex.getSpecies(pokemon);
     if (!species) return false;
-    return this.regulations.allowlist(regulation).has(species.id);
+    const allowlist = this.regulations.allowlist(regulation);
+    // La allowlist es por especie: una forma/mega es legal si su especie base
+    // lo es (p. ej. Charizard-Mega-Y cuenta como Charizard).
+    return allowlist.has(species.id) || allowlist.has(species.baseSpeciesId);
   }
 
   /** Nombres canónicos de todos los Pokémon legales, ordenados. */

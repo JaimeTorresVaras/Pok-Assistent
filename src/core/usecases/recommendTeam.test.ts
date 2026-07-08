@@ -13,51 +13,58 @@ const calc = new SmogonDamageCalcAdapter();
 const legality = new LegalityService(pokedex, new StaticRegulationData());
 const usecase = new RecommendTeamUseCase({ pokedex, meta, calc, legality });
 
-describe("RecommendTeamUseCase", () => {
-  it("con datos de uso: recomienda el set más frecuente del meta", async () => {
+describe("RecommendTeamUseCase (datos reales M-B)", () => {
+  it("con datos de uso: ítem/habilidad/movimientos reales del meta", async () => {
     const [rec] = await usecase.exec(["Garchomp"], "M-B");
 
     expect(rec.pokemon).toBe("Garchomp");
-    expect(rec.recommended.nature).toBe("Jolly"); // spread top del placeholder
-    expect(rec.recommended.item).toBe("Life Orb");
-    expect(rec.recommended.evs).toEqual({ atk: 252, def: 4, spe: 252 });
+    expect(rec.recommended.item).toBe("Life Orb"); // 67.6% real
+    expect(rec.recommended.ability).toBe("Rough Skin"); // 94.9% real
+    expect(rec.recommended.moves).toContain("Earthquake");
     expect(rec.recommended.moves).toHaveLength(4);
-    expect(rec.metaMoves[0]).toContain("Earthquake");
-    expect(rec.reasoning).toContain("Set más usado");
+    expect(rec.metaMoves[0]).toMatch(/%$/); // "Dragon Claw 92.6%"
+  });
+
+  it("sin spreads públicos: deriva el spread de las stats base y lo declara", async () => {
+    const [rec] = await usecase.exec(["Garchomp"], "M-B");
+
+    // Garchomp: atk 130 > spa 80 -> físico
+    expect(rec.recommended.nature).toBe("Adamant");
+    expect(rec.recommended.evs.atk).toBe(252);
+    expect(rec.recommended.evs.spe).toBe(252);
+    expect(rec.reasoning).toContain("derivado de sus stats base");
   });
 
   it("calcula benchmarks reales verificados contra amenazas top", async () => {
     const [rec] = await usecase.exec(["Garchomp"], "M-B");
 
-    // La única otra amenaza del placeholder es Amoonguss.
     expect(rec.benchmarks.length).toBeGreaterThan(0);
     for (const b of rec.benchmarks) {
       expect(b.goal).toBeTruthy();
       expect(typeof b.verified).toBe("boolean");
       expect(b.target).toMatch(/%/); // siempre lleva el % calculado por el motor
     }
-    // Sabemos por la Fase 2 que EQ hace 49.8–59.4% a ese Amoonguss => no es 2HKO garantizado... sí lo es (>=50 falla por 49.8): verificado o no, debe existir el benchmark ofensivo.
-    expect(rec.benchmarks.some((b) => b.goal.includes("Amoonguss"))).toBe(true);
+    // Sinistcha (amenaza #2 real) debe aparecer en algún benchmark.
+    expect(rec.benchmarks.some((b) => b.goal.includes("Sinistcha"))).toBe(true);
   });
 
-  it("sin datos de uso: spread genérico según su stat de ataque mayor", async () => {
-    // Incineroar es legal en el placeholder pero no tiene datos de meta.
-    const [rec] = await usecase.exec(["Incineroar"], "M-B");
+  it("legal pero fuera del top: spread genérico según su stat de ataque mayor", async () => {
+    // Vileplume es del roster (novedad M-B) pero no está en el top de uso.
+    const [rec] = await usecase.exec(["Vileplume"], "M-B");
 
-    expect(rec.recommended.nature).toBe("Adamant"); // atk 115 > spa 90
-    expect(rec.recommended.evs.atk).toBe(252);
-    expect(rec.recommended.evs.spe).toBe(252);
+    expect(rec.recommended.nature).toBe("Modest"); // spa 110 > atk 80
+    expect(rec.recommended.evs.spa).toBe(252);
     expect(rec.reasoning).toContain("Sin datos de uso");
     expect(rec.metaMoves).toEqual([]);
   });
 
-  it("rechaza equipos con Pokémon ilegales", async () => {
-    await expect(usecase.exec(["Garchomp", "Mewtwo"], "M-B")).rejects.toThrow(IllegalTeamError);
-    await expect(usecase.exec(["Mewtwo"], "M-B")).rejects.toThrow(/Mewtwo/);
+  it("rechaza equipos con Pokémon fuera del roster de Champions", async () => {
+    await expect(usecase.exec(["Garchomp", "Amoonguss"], "M-B")).rejects.toThrow(IllegalTeamError);
+    await expect(usecase.exec(["Amoonguss"], "M-B")).rejects.toThrow(/Amoonguss/);
   });
 
-  it("devuelve una recomendación por cada miembro del equipo", async () => {
-    const recs = await usecase.exec(["Garchomp", "Amoonguss", "Incineroar"], "M-B");
-    expect(recs.map((r) => r.pokemon)).toEqual(["Garchomp", "Amoonguss", "Incineroar"]);
+  it("devuelve una recomendación por cada miembro, en orden", async () => {
+    const recs = await usecase.exec(["Garchomp", "Sinistcha", "Vileplume"], "M-B");
+    expect(recs.map((r) => r.pokemon)).toEqual(["Garchomp", "Sinistcha", "Vileplume"]);
   });
 });

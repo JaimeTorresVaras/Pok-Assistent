@@ -1,17 +1,34 @@
 import { Generations, type Generation, type Specie } from "@pkmn/data";
 import { Dex } from "@pkmn/dex";
 
+import { toID } from "@/core/domain/ids";
 import type { SpeciesInfo } from "@/core/domain/model";
 import type { PokedexPort } from "@/core/ports/pokedexPort";
 
 const DEFAULT_GEN = 9;
+
+/**
+ * Filtro de existencia ampliado para Pokémon Champions: el roster incluye
+ * Pokémon y megas que no están en los juegos de la gen 9 (marcados como
+ * "Past" en @pkmn, p. ej. Aerodactyl o Charizard-Mega-Y), así que no podemos
+ * usar el filtro de legalidad por defecto de @pkmn/data.
+ */
+function championsExists(d: { exists?: boolean; isNonstandard?: string | null }): boolean {
+  if (!d.exists) return false;
+  if (d.isNonstandard && d.isNonstandard !== "Past") return false;
+  return true;
+}
 
 /** Adaptador de PokedexPort sobre el ecosistema @pkmn. */
 export class PkmnPokedexAdapter implements PokedexPort {
   private readonly gen: Generation;
 
   constructor(genNum: number = DEFAULT_GEN) {
-    this.gen = new Generations(Dex).get(genNum as Parameters<Generations["get"]>[0]);
+    const gens = new Generations(
+      Dex,
+      championsExists as ConstructorParameters<typeof Generations>[1],
+    );
+    this.gen = gens.get(genNum as Parameters<Generations["get"]>[0]);
   }
 
   getSpecies(nameOrId: string): SpeciesInfo | null {
@@ -21,6 +38,7 @@ export class PkmnPokedexAdapter implements PokedexPort {
     return {
       id: species.id,
       name: species.name,
+      baseSpeciesId: species.baseSpecies ? toID(species.baseSpecies) : species.id,
       baseStats: { hp, atk, def, spa, spd, spe },
       types: [...species.types],
       abilities: Object.values(species.abilities).filter(
@@ -32,6 +50,10 @@ export class PkmnPokedexAdapter implements PokedexPort {
   /**
    * Movimientos aprendibles en esta generación, incluyendo los heredados de
    * las pre-evoluciones. Nombres ordenados alfabéticamente.
+   *
+   * ⚠️ Limitación conocida: los learnsets vienen de los juegos principales;
+   * el movepool exacto de Champions (502 movimientos permitidos en M-B)
+   * puede diferir. Se refinará con datos propios de Champions.
    */
   async getLearnset(nameOrId: string): Promise<string[]> {
     const genPrefix = String(this.gen.num);

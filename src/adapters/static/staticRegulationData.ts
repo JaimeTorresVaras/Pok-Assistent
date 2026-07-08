@@ -1,32 +1,22 @@
+import allowlistMB from "./data/allowlist-mb.json";
+
 import { toID } from "@/core/domain/ids";
 import type { Regulation } from "@/core/domain/model";
 import type { RegulationDataPort } from "@/core/ports/regulationDataPort";
 
 /**
- * Adaptador estático de RegulationDataPort.
+ * Adaptador estático de RegulationDataPort con datos REALES.
  *
- * ⚠️ PLACEHOLDER: la lista de M-B es un subconjunto de EJEMPLO con nombres
- * reales, suficiente para programar y testear la legalidad. Reemplazar por la
- * allowlist completa y oficial de la Reg. M-B.
+ * Fuente M-B: roster completo de Pokémon Champions (209 especies) — en esta
+ * regulación no hay bans, así que allowlist = roster. Ver `source` y
+ * `retrievedAt` dentro de data/allowlist-mb.json. Dataset manual por ahora;
+ * la ingesta automática (Fase 5) lo mantendrá al día.
+ *
+ * Nota: la lista es por ESPECIE. Las formas y megas se aceptan vía la especie
+ * base en LegalityService (p. ej. Charizard-Mega-Y cuenta como Charizard).
  */
 const ALLOWLISTS: Record<string, string[]> = {
-  "M-B": [
-    "Garchomp",
-    "Amoonguss",
-    "Incineroar",
-    "Flutter Mane",
-    "Whimsicott",
-    "Kingambit",
-    "Rillaboom",
-    "Landorus-Therian",
-    "Urshifu-Rapid-Strike",
-    "Chien-Pao",
-    "Gholdengo",
-    "Tornadus",
-    "Iron Hands",
-    "Ogerpon-Hearthflame",
-    "Raging Bolt",
-  ],
+  [allowlistMB.regulation]: allowlistMB.pokemon,
 };
 
 export class StaticRegulationData implements RegulationDataPort {

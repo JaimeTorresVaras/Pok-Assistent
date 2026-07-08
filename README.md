@@ -73,9 +73,20 @@ verificados** por el motor de daño (400 si hay ilegales, repetidos o body invá
 
 ## Estado
 
-✅ Fases 0–3 + **Fase 7 (primer corte)**: Team Builder funcional con recomendaciones
-deterministas (set más usado del meta + benchmarks reales) y export a Showdown.
+✅ Fases 0–3 + **Fase 7 (primer corte)** con **datos reales de la Reg. M-B**:
+- Allowlist real: roster completo de Champions (209 especies, Bulbapedia); megas y
+  formas aceptadas vía especie base (p. ej. Charizard-Mega-Y).
+- Meta real: top 12 de uso de torneos (Pikalytics/Limitless, jul 2026) con % reales
+  de uso, winrate, movimientos, ítems y habilidades. Ver `src/adapters/static/data/`
+  (cada JSON registra fuente y fecha).
 
-⚠️ Pendiente: datos reales de M-B (allowlist + top-30; hoy hay placeholder marcado),
-Fase 4–5 (DB + RAG + ingesta de torneos) y Fase 6 (AIAdvisor con Claude vía
+⚠️ Limitaciones conocidas (documentadas en el código):
+- Las fuentes públicas no exponen spreads de EVs/naturalezas de Champions → el spread
+  se deriva de las stats base y se declara como genérico en el razonamiento.
+- Los learnsets vienen de los juegos principales vía `@pkmn`; el movepool exacto de
+  Champions puede diferir. Las megas exclusivas de Champions (p. ej. Mega Staraptor)
+  aún no existen en `@pkmn`/`@smogon/calc` y se saltan en los benchmarks.
+- Dataset manual: la ingesta automática de torneos llega en la Fase 5.
+
+Siguiente: Fase 4–5 (DB + RAG + ingesta) y Fase 6 (AIAdvisor con Claude vía
 `AdvisorPort`). Ver [PLAN.md §8](./PLAN.md).

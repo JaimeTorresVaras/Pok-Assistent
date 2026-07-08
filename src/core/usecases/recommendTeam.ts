@@ -2,6 +2,8 @@ import { parseShowdownEvs } from "@/core/domain/evs";
 import type {
   Benchmark,
   CalcMon,
+  EVs,
+  Nature,
   Recommendation,
   Regulation,
   SpeciesInfo,
@@ -37,9 +39,10 @@ const BENCHMARK_THREATS = 3;
 /**
  * Caso de uso: recomendaciones por Pokémon para un equipo de hasta 6.
  *
- * Versión determinista (v1): usa el set más frecuente del meta cuando hay
- * datos de uso, o un spread genérico si no los hay, y calcula benchmarks
- * REALES (verificados por el motor de daño) contra las amenazas top.
+ * Versión determinista: ítem/habilidad/movimientos salen de los datos REALES
+ * de uso del meta cuando existen; el spread de EVs se deriva de las stats
+ * base (las fuentes públicas de Champions aún no exponen spreads) y se marca
+ * como tal. Los benchmarks se calculan SIEMPRE con el motor de daño.
  * En la Fase 6, el AdvisorPort (Claude) priorizará objetivos y explicará;
  * los números seguirán saliendo de aquí.
  */
@@ -63,7 +66,7 @@ export class RecommendTeamUseCase {
     const species = this.deps.pokedex.getSpecies(pokemon)!;
     const usage = this.deps.meta.usage(species.name, regulation);
 
-    const partial = usage ? fromUsage(usage) : fallbackSet(species, regulation);
+    const partial = usage ? fromUsage(species, usage) : fallbackSet(species, regulation);
 
     const rivals = threats.filter((t) => t.pokemon !== species.name).slice(0, BENCHMARK_THREATS);
     const benchmarks = this.computeBenchmarks(species.name, partial.recommended, rivals);
@@ -80,7 +83,8 @@ export class RecommendTeamUseCase {
   /**
    * Benchmarks reales contra las amenazas top: cuánto recibimos de su
    * movimiento más usado y cuánto les hacemos con el nuestro. Cada número
-   * sale del DamageCalcPort — nunca se inventa.
+   * sale del DamageCalcPort — nunca se inventa. (Mientras no haya spreads
+   * públicos, los rivales se calculan con spread neutro sin EVs.)
    */
   private computeBenchmarks(
     pokemon: string,
@@ -99,7 +103,6 @@ export class RecommendTeamUseCase {
 
     for (const threat of threats) {
       const rival = threatCalcMon(threat);
-      if (!rival) continue;
 
       // Defensa: primer movimiento del rival que haga daño (>0).
       const incoming = this.firstDamaging(
@@ -130,36 +133,62 @@ export class RecommendTeamUseCase {
     return benchmarks;
   }
 
-  /** Primer movimiento de la lista que hace daño real; null si ninguno. */
+  /**
+   * Primer movimiento de la lista que hace daño real; null si ninguno.
+   * (Los movimientos o especies que el motor no conozca —p. ej. megas
+   * exclusivas de Champions— se saltan sin romper.)
+   */
   private firstDamaging(attacker: CalcMon, defender: CalcMon, moves: string[]) {
     for (const move of moves) {
       try {
         const result = this.deps.calc.calcDamage(attacker, defender, move);
         if (result.maxDamage > 0) return { move, result };
       } catch {
-        // Movimiento desconocido para el motor: lo saltamos.
+        // Movimiento o especie desconocidos para el motor: lo saltamos.
       }
     }
     return null;
   }
 }
 
+/** Spread ofensivo derivado de las stats base (mientras no haya spreads reales). */
+function derivedSpread(species: SpeciesInfo): { nature: Nature; evs: EVs; label: string } {
+  const physical = species.baseStats.atk >= species.baseStats.spa;
+  return {
+    nature: physical ? "Adamant" : "Modest",
+    evs: physical ? { hp: 4, atk: 252, spe: 252 } : { hp: 4, spa: 252, spe: 252 },
+    label: physical
+      ? "ofensivo físico (252 Atk / 252 Spe)"
+      : "ofensivo especial (252 SpA / 252 Spe)",
+  };
+}
+
 /** Recomendación a partir de datos reales de uso del meta. */
-function fromUsage(usage: ThreatMon): Omit<Recommendation, "pokemon" | "benchmarks"> {
+function fromUsage(
+  species: SpeciesInfo,
+  usage: ThreatMon,
+): Omit<Recommendation, "pokemon" | "benchmarks"> {
   const spread = usage.spreads[0];
+  const derived = derivedSpread(species);
+  const winrate = usage.winratePct != null ? ` y ${usage.winratePct}% de winrate` : "";
+
   return {
     recommended: {
-      nature: spread?.nature ?? "Serious",
+      nature: spread?.nature ?? derived.nature,
       item: usage.items[0]?.name ?? "",
-      ability: usage.abilities[0]?.name,
+      ability: usage.abilities[0]?.name ?? species.abilities[0],
       teraType: usage.teraTypes[0]?.name,
-      evs: spread ? parseShowdownEvs(spread.evs) : { hp: 4, atk: 252, spe: 252 },
+      evs: spread ? parseShowdownEvs(spread.evs) : derived.evs,
       moves: usage.moves.slice(0, 4).map((m) => m.name),
     },
-    reasoning:
-      `Set más usado del meta (${usage.usagePct}% de uso): spread "${spread?.evs}" ` +
-      `(${spread?.pct}% de los ${usage.pokemon}), con el ítem y los movimientos de mayor ` +
-      `frecuencia real. El razonamiento fino (objetivos priorizados por IA) llega en la Fase 6.`,
+    reasoning: spread
+      ? `Set más usado del meta (${usage.usagePct}% de uso${winrate}): spread "${spread.evs}" ` +
+        `(${spread.pct}% de los ${usage.pokemon}), con el ítem y los movimientos de mayor ` +
+        `frecuencia real. El razonamiento fino (objetivos priorizados por IA) llega en la Fase 6.`
+      : `Datos reales del meta (${usage.usagePct}% de uso${winrate}): ítem, habilidad y ` +
+        `movimientos por frecuencia real en torneos. El spread es genérico ${derived.label}, ` +
+        `derivado de sus stats base — las fuentes públicas aún no exponen spreads de Champions; ` +
+        `la ingesta de torneos (Fase 5) y la IA (Fase 6) lo refinarán.`,
     metaMoves: usage.moves.map((m) => `${m.name} ${m.pct}%`),
   };
 }
@@ -169,34 +198,36 @@ function fallbackSet(
   species: SpeciesInfo,
   regulation: Regulation,
 ): Omit<Recommendation, "pokemon" | "benchmarks"> {
-  const physical = species.baseStats.atk >= species.baseStats.spa;
-  const attackStat = physical ? ("atk" as const) : ("spa" as const);
+  const derived = derivedSpread(species);
   return {
     recommended: {
-      nature: physical ? "Adamant" : "Modest",
+      nature: derived.nature,
       item: "",
       ability: species.abilities[0],
-      teraType: species.types[0],
-      evs: { hp: 4, [attackStat]: 252, spe: 252 },
+      teraType: undefined,
+      evs: derived.evs,
       moves: [],
     },
     reasoning:
-      `Sin datos de uso en ${regulation} para ${species.name}: spread genérico ofensivo ` +
-      `(252 ${physical ? "Atk" : "SpA"} / 252 Spe) como punto de partida. Elige 4 movimientos ` +
-      `de su movepool; los datos reales del meta y la IA (Fase 6) refinarán esta recomendación.`,
+      `Sin datos de uso en ${regulation} para ${species.name}: spread genérico ${derived.label} ` +
+      `como punto de partida. Elige 4 movimientos de su movepool; los datos del meta y la IA ` +
+      `(Fase 6) refinarán esta recomendación.`,
     metaMoves: [],
   };
 }
 
-/** CalcMon de una amenaza a partir de su spread más usado; null si no hay. */
-function threatCalcMon(threat: ThreatMon): CalcMon | null {
+/**
+ * CalcMon de una amenaza. Si el meta trae su spread real se usa; si no
+ * (caso actual de Champions), spread neutro sin EVs — números reales del
+ * motor sobre una base declarada.
+ */
+function threatCalcMon(threat: ThreatMon): CalcMon {
   const spread = threat.spreads[0];
-  if (!spread) return null;
   return {
     pokemon: threat.pokemon,
     level: 50,
-    nature: spread.nature,
-    evs: parseShowdownEvs(spread.evs),
+    nature: spread?.nature ?? "Serious",
+    evs: spread ? parseShowdownEvs(spread.evs) : {},
     item: threat.items[0]?.name,
     ability: threat.abilities[0]?.name,
   };

@@ -57,6 +57,11 @@ export interface SpeciesInfo {
   id: string;
   /** Nombre canónico, p. ej. "Landorus-Therian". */
   name: string;
+  /**
+   * Id de la especie base para formas/megas (p. ej. "charizard" para
+   * Charizard-Mega-Y). Igual a `id` si no es una forma.
+   */
+  baseSpeciesId: string;
   baseStats: Record<StatKey, number>;
   types: string[];
   abilities: string[];
@@ -81,6 +86,8 @@ export interface ThreatMon {
   regulation: Regulation;
   pokemon: string;
   usagePct: number;
+  /** % de victorias de los equipos que lo llevan (si la fuente lo da). */
+  winratePct?: number;
   moves: UsageEntry[];
   items: UsageEntry[];
   abilities: UsageEntry[];

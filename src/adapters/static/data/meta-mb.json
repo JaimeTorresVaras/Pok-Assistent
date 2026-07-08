@@ -1,0 +1,575 @@
+{
+  "regulation": "M-B",
+  "source": "Pikalytics — Pokémon Champions Reg M-B Tournaments (Limitless, últimas 4 semanas)",
+  "sourceUrl": "https://www.pikalytics.com/pokedex/championstournaments",
+  "retrievedAt": "2026-07-08",
+  "threats": [
+    {
+      "regulation": "M-B",
+      "pokemon": "Garchomp",
+      "usagePct": 38.44,
+      "winratePct": 50.6,
+      "moves": [
+        {
+          "name": "Dragon Claw",
+          "pct": 92.6
+        },
+        {
+          "name": "Protect",
+          "pct": 83.4
+        },
+        {
+          "name": "Rock Slide",
+          "pct": 78.9
+        },
+        {
+          "name": "Earthquake",
+          "pct": 78.6
+        }
+      ],
+      "items": [
+        {
+          "name": "Life Orb",
+          "pct": 67.6
+        },
+        {
+          "name": "Sitrus Berry",
+          "pct": 9.8
+        },
+        {
+          "name": "Roseli Berry",
+          "pct": 6.9
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Rough Skin",
+          "pct": 94.9
+        },
+        {
+          "name": "Sand Veil",
+          "pct": 2.5
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Sinistcha",
+      "usagePct": 32.12,
+      "winratePct": 49.4,
+      "moves": [
+        {
+          "name": "Matcha Gotcha",
+          "pct": 97
+        },
+        {
+          "name": "Rage Powder",
+          "pct": 96.7
+        },
+        {
+          "name": "Trick Room",
+          "pct": 63.8
+        },
+        {
+          "name": "Protect",
+          "pct": 61.9
+        }
+      ],
+      "items": [
+        {
+          "name": "Kasib Berry",
+          "pct": 34.6
+        },
+        {
+          "name": "Sitrus Berry",
+          "pct": 24.2
+        },
+        {
+          "name": "Coba Berry",
+          "pct": 13.5
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Hospitality",
+          "pct": 98.3
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Basculegion",
+      "usagePct": 31.63,
+      "winratePct": 52.6,
+      "moves": [
+        {
+          "name": "Last Respects",
+          "pct": 95.7
+        },
+        {
+          "name": "Aqua Jet",
+          "pct": 93.3
+        },
+        {
+          "name": "Wave Crash",
+          "pct": 85.2
+        },
+        {
+          "name": "Protect",
+          "pct": 63.4
+        }
+      ],
+      "items": [
+        {
+          "name": "Choice Scarf",
+          "pct": 35.5
+        },
+        {
+          "name": "Mystic Water",
+          "pct": 25.7
+        },
+        {
+          "name": "Life Orb",
+          "pct": 17.4
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Adaptability",
+          "pct": 90.3
+        },
+        {
+          "name": "Swift Swim",
+          "pct": 6.4
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Incineroar",
+      "usagePct": 30.9,
+      "winratePct": 51.1,
+      "moves": [
+        {
+          "name": "Fake Out",
+          "pct": 97.4
+        },
+        {
+          "name": "Parting Shot",
+          "pct": 93.2
+        },
+        {
+          "name": "Flare Blitz",
+          "pct": 89.9
+        },
+        {
+          "name": "Throat Chop",
+          "pct": 50.1
+        }
+      ],
+      "items": [
+        {
+          "name": "Sitrus Berry",
+          "pct": 61.3
+        },
+        {
+          "name": "Passho Berry",
+          "pct": 14.3
+        },
+        {
+          "name": "Chople Berry",
+          "pct": 8.6
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Intimidate",
+          "pct": 97.1
+        },
+        {
+          "name": "Blaze",
+          "pct": 1.3
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Kingambit",
+      "usagePct": 28.12,
+      "winratePct": 54.3,
+      "moves": [
+        {
+          "name": "Sucker Punch",
+          "pct": 96.7
+        },
+        {
+          "name": "Kowtow Cleave",
+          "pct": 94.6
+        },
+        {
+          "name": "Protect",
+          "pct": 72.4
+        },
+        {
+          "name": "Iron Head",
+          "pct": 68.9
+        }
+      ],
+      "items": [
+        {
+          "name": "Black Glasses",
+          "pct": 42.1
+        },
+        {
+          "name": "Chople Berry",
+          "pct": 25.6
+        },
+        {
+          "name": "Focus Sash",
+          "pct": 14.7
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Defiant",
+          "pct": 95.1
+        },
+        {
+          "name": "Supreme Overlord",
+          "pct": 2.3
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Whimsicott",
+      "usagePct": 26.06,
+      "winratePct": 50.8,
+      "moves": [
+        {
+          "name": "Tailwind",
+          "pct": 96.9
+        },
+        {
+          "name": "Moonblast",
+          "pct": 92.6
+        },
+        {
+          "name": "Encore",
+          "pct": 70.9
+        },
+        {
+          "name": "Protect",
+          "pct": 69.7
+        }
+      ],
+      "items": [
+        {
+          "name": "Focus Sash",
+          "pct": 83.9
+        },
+        {
+          "name": "Fairy Feather",
+          "pct": 5.2
+        },
+        {
+          "name": "Mental Herb",
+          "pct": 3.2
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Prankster",
+          "pct": 97.4
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Charizard-Mega-Y",
+      "usagePct": 22.86,
+      "winratePct": 53.4,
+      "moves": [
+        {
+          "name": "Protect",
+          "pct": 99.5
+        },
+        {
+          "name": "Heat Wave",
+          "pct": 98.4
+        },
+        {
+          "name": "Solar Beam",
+          "pct": 97.7
+        },
+        {
+          "name": "Weather Ball",
+          "pct": 91.2
+        }
+      ],
+      "items": [
+        {
+          "name": "Charizardite Y",
+          "pct": 100
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Blaze",
+          "pct": 77.3
+        },
+        {
+          "name": "Solar Power",
+          "pct": 17.5
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Sneasler",
+      "usagePct": 20.69,
+      "winratePct": 51.8,
+      "moves": [
+        {
+          "name": "Close Combat",
+          "pct": 97.4
+        },
+        {
+          "name": "Fake Out",
+          "pct": 94
+        },
+        {
+          "name": "Dire Claw",
+          "pct": 83.9
+        },
+        {
+          "name": "Protect",
+          "pct": 62.6
+        }
+      ],
+      "items": [
+        {
+          "name": "White Herb",
+          "pct": 59.1
+        },
+        {
+          "name": "Focus Sash",
+          "pct": 34.2
+        },
+        {
+          "name": "Life Orb",
+          "pct": 2.2
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Unburden",
+          "pct": 72.5
+        },
+        {
+          "name": "Poison Touch",
+          "pct": 23.9
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Farigiraf",
+      "usagePct": 19.52,
+      "winratePct": 49.9,
+      "moves": [
+        {
+          "name": "Trick Room",
+          "pct": 96.6
+        },
+        {
+          "name": "Psychic",
+          "pct": 57.8
+        },
+        {
+          "name": "Helping Hand",
+          "pct": 53
+        },
+        {
+          "name": "Thunderbolt",
+          "pct": 52.1
+        }
+      ],
+      "items": [
+        {
+          "name": "Sitrus Berry",
+          "pct": 68.1
+        },
+        {
+          "name": "Colbur Berry",
+          "pct": 22.5
+        },
+        {
+          "name": "Mental Herb",
+          "pct": 2.4
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Armor Tail",
+          "pct": 98.1
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Pelipper",
+      "usagePct": 18.57,
+      "winratePct": 49.8,
+      "moves": [
+        {
+          "name": "Hurricane",
+          "pct": 96.7
+        },
+        {
+          "name": "Weather Ball",
+          "pct": 90.6
+        },
+        {
+          "name": "Tailwind",
+          "pct": 89.2
+        },
+        {
+          "name": "Wide Guard",
+          "pct": 54.9
+        }
+      ],
+      "items": [
+        {
+          "name": "Sitrus Berry",
+          "pct": 40
+        },
+        {
+          "name": "Focus Sash",
+          "pct": 38.7
+        },
+        {
+          "name": "Life Orb",
+          "pct": 6.7
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Drizzle",
+          "pct": 96.7
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Floette-Eternal-Mega",
+      "usagePct": 17.85,
+      "moves": [
+        {
+          "name": "Protect",
+          "pct": 99.6
+        },
+        {
+          "name": "Dazzling Gleam",
+          "pct": 95.2
+        },
+        {
+          "name": "Moonblast",
+          "pct": 76.7
+        },
+        {
+          "name": "Calm Mind",
+          "pct": 50
+        }
+      ],
+      "items": [
+        {
+          "name": "Floettite",
+          "pct": 100
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Flower Veil",
+          "pct": 96.1
+        },
+        {
+          "name": "Fairy Aura",
+          "pct": 3.4
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    },
+    {
+      "regulation": "M-B",
+      "pokemon": "Archaludon",
+      "usagePct": 17.02,
+      "winratePct": 50.8,
+      "moves": [
+        {
+          "name": "Protect",
+          "pct": 96.6
+        },
+        {
+          "name": "Electro Shot",
+          "pct": 96.5
+        },
+        {
+          "name": "Flash Cannon",
+          "pct": 92
+        },
+        {
+          "name": "Dragon Pulse",
+          "pct": 81.5
+        }
+      ],
+      "items": [
+        {
+          "name": "Leftovers",
+          "pct": 88.8
+        },
+        {
+          "name": "Chople Berry",
+          "pct": 2.8
+        },
+        {
+          "name": "Nothing",
+          "pct": 2.1
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Stamina",
+          "pct": 94.7
+        },
+        {
+          "name": "Sturdy",
+          "pct": 1.8
+        }
+      ],
+      "spreads": [],
+      "teraTypes": []
+    }
+  ]
+}

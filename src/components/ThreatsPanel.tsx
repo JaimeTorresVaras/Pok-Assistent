@@ -21,6 +21,7 @@ export function ThreatsPanel({ threats }: Props) {
                 <span className="font-medium">{t.pokemon}</span>
                 <span className="font-mono text-xs text-neutral-500 tabular-nums">
                   {t.usagePct.toFixed(1)}%
+                  {t.winratePct != null ? ` · WR ${t.winratePct.toFixed(0)}%` : ""}
                 </span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
@@ -40,8 +41,8 @@ export function ThreatsPanel({ threats }: Props) {
         </ul>
       )}
       <p className="mt-4 border-t border-neutral-200 pt-3 text-[11px] leading-relaxed text-neutral-400 dark:border-neutral-800">
-        ⚠️ Datos de uso placeholder: se reemplazarán por el top real de la regulación (y luego por
-        la ingesta automática de torneos, Fase 5).
+        Datos reales: Pikalytics — torneos Reg M-B (Limitless), jul 2026. Dataset manual por ahora;
+        la ingesta automática (Fase 5) lo mantendrá al día.
       </p>
     </aside>
   );
