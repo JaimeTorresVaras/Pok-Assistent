@@ -1,0 +1,11 @@
+.next
+out
+build
+coverage
+node_modules
+package-lock.json
+next-env.d.ts
+public
+
+# Documentos con formato propio que no queremos que Prettier reflowee
+*.md
