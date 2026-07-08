@@ -1,0 +1,28 @@
+# dependencias
+/node_modules
+/.pnp
+.pnp.*
+
+# builds
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# tests
+/coverage
+
+# variables de entorno (¡nunca commitear las claves reales!)
+.env
+.env*.local
+
+# deploy
+.vercel
+
+# logs y sistema
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
