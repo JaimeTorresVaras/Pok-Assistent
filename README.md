@@ -9,11 +9,36 @@ el meta — apoyado en datos reales de uso y en cálculo de daño verificado.
 
 ## Stack
 
-- **Next.js 16 (App Router) + React 19 + TypeScript**
-- **Tailwind CSS v4**
-- **ESLint + Prettier**
-- _(próximas fases)_ **@smogon/calc**, **@pkmn/dex · @pkmn/data · @pkmn/sets**,
-  **API de Claude**, **Postgres + pgvector (Supabase)** y **Voyage AI**.
+- **Next.js 16 (App Router) + React 19 + TypeScript** · **Tailwind CSS v4**
+- **@smogon/calc** (motor de daño) · **@pkmn/dex · @pkmn/data** (Pokédex)
+- **Vitest** · **ESLint + Prettier**
+- _(próximas fases)_ **@pkmn/sets**, **API de Claude**, **Postgres + pgvector (Supabase)**
+  y **Voyage AI**.
+
+## Arquitectura (hexagonal / puertos y adaptadores)
+
+El núcleo no conoce frameworks ni librerías; todo lo externo entra por puertos.
+
+```
+src/
+├── core/                    NÚCLEO (cero dependencias externas)
+│   ├── domain/              modelo + fórmula de stats + utils EVs/Showdown (puro)
+│   ├── ports/               PokedexPort · RegulationDataPort · MetaUsagePort
+│   │                        DamageCalcPort · SetRetrievalPort (F5) · AdvisorPort (F6)
+│   └── usecases/            LegalityService · EVOptimizer · RecommendTeamUseCase
+├── adapters/                IMPLEMENTAN los puertos
+│   ├── pkmn/                Pokédex vía @pkmn (stats, tipos, movepools)
+│   ├── smogon/              daño vía @smogon/calc (dobles, nivel 50)
+│   └── static/              allowlist + usage del meta (placeholder → Fase 5)
+├── composition/             container.ts — composition root (une puertos y adaptadores)
+├── app/                     ADAPTADOR DE ENTRADA: UI Next.js + /api/recommend
+├── components/              Team Builder · tarjetas · panel de amenazas · export Showdown
+└── ingest/                  pipeline de ingesta de torneos (stub, Fase 5)
+```
+
+Reglas: `core/` nunca importa de `adapters/` ni de `app/`; solo `composition/`
+conoce ambos lados; los números de daño/stats salen siempre de los puertos
+deterministas (la IA nunca es la fuente de verdad de un número).
 
 ## Requisitos
 
@@ -34,24 +59,23 @@ npm run dev                  # http://localhost:3000
 |---|---|
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build` | Build de producción |
+| `npm start` | Servidor de producción |
+| `npm test` / `npm run test:watch` | Tests (Vitest) |
 | `npm run lint` | ESLint |
-| `npm run format` | Formatea el código con Prettier |
-| `npm run format:check` | Verifica el formato sin escribir |
+| `npm run format` / `format:check` | Prettier |
 | `npm run typecheck` | Chequeo de tipos (`tsc --noEmit`) |
 
-## Estructura
+## API
 
-```
-src/
-├── app/        # Rutas y UI (Next.js App Router)
-├── types/      # Tipos de dominio (ThreatMon, TournamentDoc, Recommendation…)
-├── services/   # MetaService · DexService · CalcEngine · EVOptimizer
-│               #   Retriever · AIAdvisor · Verifier
-└── ingest/     # Pipeline de ingesta de torneos (RAG)
-```
+`POST /api/recommend` — body `{ "team": ["Garchomp", ...], "regulation": "M-B" }` →
+`{ "recommendations": [...] }` con set recomendado, razonamiento y **benchmarks
+verificados** por el motor de daño (400 si hay ilegales, repetidos o body inválido).
 
 ## Estado
 
-🚧 **Fase 0 completada** (andamiaje). Los servicios son stubs tipados; cada uno indica
-en qué fase se implementa. Siguiente: **Fase 1** (DexService + legalidad por regulación)
-y **Fase 2** (CalcEngine). Ver [PLAN.md §8](./PLAN.md).
+✅ Fases 0–3 + **Fase 7 (primer corte)**: Team Builder funcional con recomendaciones
+deterministas (set más usado del meta + benchmarks reales) y export a Showdown.
+
+⚠️ Pendiente: datos reales de M-B (allowlist + top-30; hoy hay placeholder marcado),
+Fase 4–5 (DB + RAG + ingesta de torneos) y Fase 6 (AIAdvisor con Claude vía
+`AdvisorPort`). Ver [PLAN.md §8](./PLAN.md).
