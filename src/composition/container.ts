@@ -1,7 +1,9 @@
+import { PgTournamentStore } from "@/adapters/postgres/pgTournamentStore";
 import { PkmnPokedexAdapter } from "@/adapters/pkmn/pkmnPokedexAdapter";
 import { SmogonDamageCalcAdapter } from "@/adapters/smogon/smogonDamageCalcAdapter";
 import { StaticMetaAdapter } from "@/adapters/static/staticMetaAdapter";
 import { StaticRegulationData } from "@/adapters/static/staticRegulationData";
+import { VoyageEmbeddingsAdapter } from "@/adapters/voyage/voyageEmbeddingsAdapter";
 import type { DamageCalcPort } from "@/core/ports/damageCalcPort";
 import type { MetaUsagePort } from "@/core/ports/metaUsagePort";
 import type { PokedexPort } from "@/core/ports/pokedexPort";
@@ -9,6 +11,7 @@ import type { RegulationDataPort } from "@/core/ports/regulationDataPort";
 import { LegalityService } from "@/core/usecases/legality";
 import { EVOptimizer } from "@/core/usecases/optimizeEvs";
 import { RecommendTeamUseCase } from "@/core/usecases/recommendTeam";
+import { RetrieveSets } from "@/core/usecases/retrieveSets";
 
 export interface Container {
   pokedex: PokedexPort;
@@ -41,4 +44,30 @@ export function getContainer(): Container {
     instance = { pokedex, regulations, meta, damage, legality, evOptimizer, recommendTeam };
   }
   return instance;
+}
+
+let retrieval: RetrieveSets | null = null;
+
+/**
+ * RAG (Fase 4+): retrieval por similitud sobre Supabase + Voyage.
+ * Requiere DATABASE_URL y VOYAGE_API_KEY en el entorno; es lazy para que la
+ * app funcione sin credenciales mientras nadie lo use (lo consumen la
+ * ingesta de la Fase 5 y el AIAdvisor de la Fase 6).
+ */
+export function getRetrieval(): RetrieveSets {
+  if (!retrieval) {
+    const databaseUrl = process.env.DATABASE_URL;
+    const voyageKey = process.env.VOYAGE_API_KEY;
+    if (!databaseUrl || !voyageKey) {
+      throw new Error(
+        "RAG no configurado: define DATABASE_URL y VOYAGE_API_KEY en .env.local " +
+          "y corre `npm run db:migrate` (ver README, Fase 4).",
+      );
+    }
+    retrieval = new RetrieveSets(
+      new VoyageEmbeddingsAdapter(voyageKey, { model: process.env.VOYAGE_MODEL }),
+      new PgTournamentStore(databaseUrl),
+    );
+  }
+  return retrieval;
 }

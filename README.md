@@ -71,6 +71,26 @@ npm run dev                  # http://localhost:3000
 `{ "recommendations": [...] }` con set recomendado, razonamiento y **benchmarks
 verificados** por el motor de daño (400 si hay ilegales, repetidos o body inválido).
 
+## Fase 4 — Base de datos + vector store (RAG)
+
+El código de la capa de datos ya está listo (esquema, adaptadores y retrieval);
+para **activarlo** hacen falta dos credenciales en `.env.local`:
+
+1. **Supabase** — crea un proyecto en [supabase.com](https://supabase.com) y copia la
+   *Connection string (URI)* (Project Settings → Database) en `DATABASE_URL`.
+2. **Voyage AI** — crea una API key en [dashboard.voyageai.com](https://dashboard.voyageai.com)
+   y ponla en `VOYAGE_API_KEY`.
+3. Aplica el esquema: `npm run db:migrate` (crea `tournament_teams`,
+   `doc_embeddings` con índice HNSW y `usage_stats`; ver `db/migrations/`).
+4. `npm test` — los tests de integración de Postgres corren automáticamente
+   cuando `DATABASE_URL` está presente (sin ella se saltan).
+
+Piezas: `EmbeddingsPort` → adaptador **Voyage** (`voyage-3.5`, 1024 dims,
+configurable con `VOYAGE_MODEL`) · `TournamentStorePort` → adaptador
+**Postgres/pgvector** · caso de uso **RetrieveSets** (implementa
+`SetRetrievalPort`: embed de la consulta + similitud coseno + filtros por
+regulación/Pokémon/fecha). La ingesta que puebla estas tablas es la Fase 5.
+
 ## Estado
 
 ✅ Fases 0–3 + **Fase 7 (primer corte)** con **datos reales de la Reg. M-B**:
@@ -88,5 +108,8 @@ verificados** por el motor de daño (400 si hay ilegales, repetidos o body invá
   aún no existen en `@pkmn`/`@smogon/calc` y se saltan en los benchmarks.
 - Dataset manual: la ingesta automática de torneos llega en la Fase 5.
 
-Siguiente: Fase 4–5 (DB + RAG + ingesta) y Fase 6 (AIAdvisor con Claude vía
-`AdvisorPort`). Ver [PLAN.md §8](./PLAN.md).
+✅ **Fase 4 (código)**: esquema Postgres+pgvector, adaptadores Voyage/Postgres y
+retrieval por similitud — pendiente solo de credenciales (ver sección Fase 4).
+
+Siguiente: Fase 5 (ingesta de torneos que puebla el RAG) y Fase 6 (AIAdvisor
+con Claude vía `AdvisorPort`). Ver [PLAN.md §8](./PLAN.md).
