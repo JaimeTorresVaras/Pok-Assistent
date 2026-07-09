@@ -84,3 +84,20 @@ describe("VoyageEmbeddingsAdapter (fetch mockeado)", () => {
     expect(() => new VoyageEmbeddingsAdapter("")).toThrow(/VOYAGE_API_KEY/);
   });
 });
+
+/** Integración real contra la API de Voyage. Solo corre con VOYAGE_API_KEY. */
+const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
+
+describe.skipIf(!VOYAGE_API_KEY)(
+  "VoyageEmbeddingsAdapter (integración real, requiere VOYAGE_API_KEY)",
+  () => {
+    it("embebe un texto real con 1024 dimensiones", async () => {
+      const adapter = new VoyageEmbeddingsAdapter(VOYAGE_API_KEY!, {
+        model: process.env.VOYAGE_MODEL,
+      });
+      const [vector] = await adapter.embedQueries(["Spread de EVs de Garchomp en VGC"]);
+      expect(vector).toHaveLength(1024);
+      expect(vector.every((n) => typeof n === "number" && Number.isFinite(n))).toBe(true);
+    }, 30_000);
+  },
+);
