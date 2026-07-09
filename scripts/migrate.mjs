@@ -21,11 +21,11 @@ if (existsSync(envFile)) {
 const url = process.env.DATABASE_URL;
 if (!url) {
   console.error("Falta DATABASE_URL (en el entorno o en .env.local).");
-  console.error("Supabase: Project Settings → Database → Connection string (URI).");
+  console.error("Railway: servicio Postgres → pestaña Connect → Public Network (URL pública).");
   process.exit(1);
 }
 
-// prepare:false para ser compatible con el pooler de Supabase (PgBouncer).
+// prepare:false para ser compatible con poolers tipo PgBouncer si los hubiera.
 const sql = postgres(url, { prepare: false, max: 1, onnotice: () => {} });
 
 try {

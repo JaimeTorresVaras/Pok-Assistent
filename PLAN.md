@@ -13,6 +13,8 @@
 - **Fuentes de uso del meta:** Pikalytics (`/champions`), Pokémon Zone, Victory Road, Pokékipe. Muestran top de uso, movimientos, ítems, habilidades y cores. **Ninguna expone API pública oficial** → hay que scrapear o mantener el dataset a mano.
 
 > **Decisiones asumidas** (cambiables): stack **Next.js + TypeScript**, motor de daño **@smogon/calc**, IA con **API de Claude**, base de datos **Postgres + pgvector (Supabase)**, embeddings **Voyage AI**, datos **híbridos** (dataset manual del top del meta ahora + **RAG que se actualiza solo con los resultados de torneos**), optimizador **auto + ajuste fino**.
+>
+> **Actualización (jul 2026):** hosting consolidado en **Railway** — app Next.js, **Postgres + pgvector** (reemplaza a Supabase) y **cron de ingesta** como servicio del mismo repo (reemplaza a Vercel + Vercel Cron en las Fases 4, 5 y 8). Motivo: plataforma ya contratada, procesos reales sin timeouts serverless para la ingesta y la IA.
 
 ---
 

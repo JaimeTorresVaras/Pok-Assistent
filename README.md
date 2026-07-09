@@ -12,8 +12,8 @@ el meta — apoyado en datos reales de uso y en cálculo de daño verificado.
 - **Next.js 16 (App Router) + React 19 + TypeScript** · **Tailwind CSS v4**
 - **@smogon/calc** (motor de daño) · **@pkmn/dex · @pkmn/data** (Pokédex)
 - **Vitest** · **ESLint + Prettier**
-- _(próximas fases)_ **@pkmn/sets**, **API de Claude**, **Postgres + pgvector (Supabase)**
-  y **Voyage AI**.
+- **Postgres + pgvector** y **Voyage AI** (RAG) · hosting en **Railway**
+- _(próximas fases)_ **@pkmn/sets** (ingesta) y **API de Claude** (asesor IA).
 
 ## Arquitectura (hexagonal / puertos y adaptadores)
 
@@ -73,11 +73,15 @@ verificados** por el motor de daño (400 si hay ilegales, repetidos o body invá
 
 ## Fase 4 — Base de datos + vector store (RAG)
 
+Hosting: **Railway** (app + Postgres/pgvector + cron, todo en la misma plataforma).
 El código de la capa de datos ya está listo (esquema, adaptadores y retrieval);
 para **activarlo** hacen falta dos credenciales en `.env.local`:
 
-1. **Supabase** — crea un proyecto en [supabase.com](https://supabase.com) y copia la
-   *Connection string (URI)* (Project Settings → Database) en `DATABASE_URL`.
+1. **Railway Postgres con pgvector** — en tu proyecto de Railway: *New → Database*
+   con el template [pgvector](https://railway.com/deploy/pgvector-latest). Copia la
+   URL **pública** (servicio Postgres → pestaña *Connect* → Public Network) en
+   `DATABASE_URL` para desarrollo local. (En producción, la app desplegada en
+   Railway usará la URL interna `*.railway.internal` — Fase 8.)
 2. **Voyage AI** — crea una API key en [dashboard.voyageai.com](https://dashboard.voyageai.com)
    y ponla en `VOYAGE_API_KEY`.
 3. Aplica el esquema: `npm run db:migrate` (crea `tournament_teams`,
@@ -109,7 +113,8 @@ regulación/Pokémon/fecha). La ingesta que puebla estas tablas es la Fase 5.
 - Dataset manual: la ingesta automática de torneos llega en la Fase 5.
 
 ✅ **Fase 4 (código)**: esquema Postgres+pgvector, adaptadores Voyage/Postgres y
-retrieval por similitud — pendiente solo de credenciales (ver sección Fase 4).
+retrieval por similitud — pendiente solo de credenciales de Railway/Voyage (ver
+sección Fase 4). Hosting decidido: **Railway** (app + DB + cron).
 
 Siguiente: Fase 5 (ingesta de torneos que puebla el RAG) y Fase 6 (AIAdvisor
 con Claude vía `AdvisorPort`). Ver [PLAN.md §8](./PLAN.md).
