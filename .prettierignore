@@ -9,3 +9,6 @@ public
 
 # Documentos con formato propio que no queremos que Prettier reflowee
 *.md
+
+# Fixtures de HTML real: deben quedar byte-a-byte como las páginas originales
+**/__fixtures__/

@@ -33,15 +33,13 @@ describe("mapeos puros doc <-> fila", () => {
   it("docToRow -> rowToDoc es un roundtrip", () => {
     const row = docToRow(DOC);
     expect(row.doc_text).toBe(DOC.text);
-    expect(typeof row.set).toBe("string"); // serializado para jsonb
-    const back = rowToDoc({ ...row, set: JSON.parse(row.set) });
-    expect(back).toEqual(DOC);
+    expect(rowToDoc(row)).toEqual(DOC);
   });
 
   it("rowToDoc tolera jsonb como string u objeto", () => {
     const row = docToRow(DOC);
-    expect(rowToDoc({ ...row, set: row.set })).toEqual(DOC); // string
-    expect(rowToDoc({ ...row, set: JSON.parse(row.set) })).toEqual(DOC); // objeto
+    expect(rowToDoc({ ...row, set: JSON.stringify(row.set) })).toEqual(DOC); // string
+    expect(rowToDoc(row)).toEqual(DOC); // objeto
   });
 });
 

@@ -121,11 +121,17 @@ export interface TournamentDoc {
   pokemon: string;
   set: PokemonSet;
   teammates: string[];
+  /** Récord del equipo en el torneo (para winrate), si la fuente lo da. */
+  wins?: number;
+  losses?: number;
   /** Texto que se convierte en vector (embedding). */
   text: string;
   /** Vector del embedding (se rellena en la ingesta). */
   embedding?: number[];
 }
+
+/** Fila de usage agregado que produce la ingesta (ThreatMon + tamaño de muestra). */
+export type UsageStats = ThreatMon & { sampleSize: number };
 
 /** Un participante de un cálculo de daño (atacante o defensor). */
 export interface CalcMon {

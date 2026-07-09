@@ -95,6 +95,36 @@ configurable con `VOYAGE_MODEL`) · `TournamentStorePort` → adaptador
 `SetRetrievalPort`: embed de la consulta + similitud coseno + filtros por
 regulación/Pokémon/fecha). La ingesta que puebla estas tablas es la Fase 5.
 
+## Fase 5 — Ingesta de torneos (el RAG se actualiza solo)
+
+Pipeline: **Pikalytics** (índice + página del torneo: ranks, récord W-L, especies
+canónicas) → **Limitless** (teamlist: ítem, habilidad, **naturaleza real** y
+movimientos por Pokémon) → validación de legalidad → upsert en Postgres →
+embeddings de Voyage (solo docs nuevos) → **recálculo de usage con decaimiento
+temporal** (vida media 14 días) → marca de agua de torneos procesados.
+
+```bash
+npm run ingest                                   # defaults: 3 torneos nuevos, top 16
+npm run ingest -- --max-tournaments=5 --max-placement=8
+npm run rag:query -- --pokemon=Garchomp          # debug: qué recupera el RAG
+```
+
+Notas de datos: Champions no publica EVs ni Tera en teamsheets (los spreads
+agregan la naturaleza real; los EVs se siguen derivando). Las megas exclusivas
+de Champions (p. ej. Raichu-Mega-X) se aceptan vía su especie base. El free
+tier de Voyage (10K tokens/min) se maneja con lotes de 64 + reintentos ante
+429 (configurable con `VOYAGE_MAX_BATCH`).
+
+### Cron en Railway (Fase 8)
+
+Crear un **servicio nuevo del mismo repo** en Railway con:
+- Comando de start: `npm run ingest -- --max-tournaments=5`
+- **Cron Schedule**: `0 6 * * *` (diario a las 06:00 UTC; los torneos grandes
+  cierran el fin de semana)
+- Variables: `DATABASE_URL` (la interna `*.railway.internal`), `VOYAGE_API_KEY`
+
+El proceso corre, termina y Railway lo agenda de nuevo — sin timeouts serverless.
+
 ## Estado
 
 ✅ Fases 0–3 + **Fase 7 (primer corte)** con **datos reales de la Reg. M-B**:

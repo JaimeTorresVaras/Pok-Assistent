@@ -19,12 +19,26 @@ export class VoyageEmbeddingsAdapter implements EmbeddingsPort {
   readonly model: string;
   private readonly apiKey: string;
   private readonly baseUrl: string;
+  private readonly maxBatch: number;
+  private readonly retryDelaysMs: number[];
 
-  constructor(apiKey: string, opts: { model?: string; baseUrl?: string } = {}) {
+  constructor(
+    apiKey: string,
+    opts: {
+      model?: string;
+      baseUrl?: string;
+      /** Textos por request (el free tier de Voyage aguanta ~64). */
+      maxBatch?: number;
+      /** Esperas ante 429 (rate limit), en ms. */
+      retryDelaysMs?: number[];
+    } = {},
+  ) {
     if (!apiKey) throw new Error("VoyageEmbeddingsAdapter: falta la API key (VOYAGE_API_KEY).");
     this.apiKey = apiKey;
     this.model = opts.model ?? DEFAULT_MODEL;
     this.baseUrl = opts.baseUrl ?? DEFAULT_BASE_URL;
+    this.maxBatch = opts.maxBatch ?? MAX_BATCH;
+    this.retryDelaysMs = opts.retryDelaysMs ?? [5_000, 15_000, 30_000, 60_000];
   }
 
   embedDocuments(texts: string[]): Promise<number[][]> {
@@ -39,8 +53,22 @@ export class VoyageEmbeddingsAdapter implements EmbeddingsPort {
     if (texts.length === 0) return [];
 
     const out: number[][] = [];
-    for (let i = 0; i < texts.length; i += MAX_BATCH) {
-      const batch = texts.slice(i, i + MAX_BATCH);
+    for (let i = 0; i < texts.length; i += this.maxBatch) {
+      const batch = texts.slice(i, i + this.maxBatch);
+      const json = await this.requestWithRetry(batch, inputType);
+      // La API devuelve `index`: restauramos el orden del lote por seguridad.
+      const ordered = [...json.data].sort((a, b) => a.index - b.index);
+      out.push(...ordered.map((d) => d.embedding));
+    }
+    return out;
+  }
+
+  /** Un request a la API, reintentando ante 429 (rate limit del tier). */
+  private async requestWithRetry(
+    batch: string[],
+    inputType: "document" | "query",
+  ): Promise<VoyageResponse> {
+    for (let attempt = 0; ; attempt++) {
       const res = await fetch(`${this.baseUrl}/embeddings`, {
         method: "POST",
         headers: {
@@ -55,16 +83,16 @@ export class VoyageEmbeddingsAdapter implements EmbeddingsPort {
         }),
       });
 
-      if (!res.ok) {
-        const detail = (await res.text().catch(() => "")).slice(0, 200);
-        throw new Error(`Voyage API ${res.status}: ${detail}`);
-      }
+      if (res.ok) return (await res.json()) as VoyageResponse;
 
-      const json = (await res.json()) as VoyageResponse;
-      // La API devuelve `index`: restauramos el orden del lote por seguridad.
-      const ordered = [...json.data].sort((a, b) => a.index - b.index);
-      out.push(...ordered.map((d) => d.embedding));
+      const detail = (await res.text().catch(() => "")).slice(0, 200);
+      if (res.status === 429 && attempt < this.retryDelaysMs.length) {
+        const wait = this.retryDelaysMs[attempt];
+        console.warn(`Voyage 429 (rate limit): reintento ${attempt + 1} en ${wait / 1000}s...`);
+        await new Promise((resolve) => setTimeout(resolve, wait));
+        continue;
+      }
+      throw new Error(`Voyage API ${res.status}: ${detail}`);
     }
-    return out;
   }
 }

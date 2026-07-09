@@ -46,6 +46,11 @@ describe("RetrieveSets (con puertos falsos)", () => {
         searches.push(q);
         return [DOC];
       },
+      embeddedDocIds: async () => new Set<string>(),
+      listDocs: async () => [],
+      replaceUsageStats: async () => {},
+      getState: async () => null,
+      setState: async () => {},
       close: async () => {},
     };
 
@@ -83,6 +88,11 @@ describe("RetrieveSets (con puertos falsos)", () => {
         seenK = q.k;
         return [];
       },
+      embeddedDocIds: async () => new Set<string>(),
+      listDocs: async () => [],
+      replaceUsageStats: async () => {},
+      getState: async () => null,
+      setState: async () => {},
       close: async () => {},
     };
 
