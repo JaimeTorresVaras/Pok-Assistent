@@ -5,8 +5,8 @@ import { StaticMetaAdapter } from "@/adapters/static/staticMetaAdapter";
 describe("StaticMetaAdapter (datos reales de torneos Reg M-B)", () => {
   const meta = new StaticMetaAdapter();
 
-  it("el top está ordenado por uso y Garchomp es #1", () => {
-    const top = meta.topThreats("M-B");
+  it("el top está ordenado por uso y Garchomp es #1", async () => {
+    const top = await meta.topThreats("M-B");
     expect(top.length).toBeGreaterThanOrEqual(10);
     expect(top[0].pokemon).toBe("Garchomp");
     // ordenado descendente
@@ -15,8 +15,8 @@ describe("StaticMetaAdapter (datos reales de torneos Reg M-B)", () => {
     }
   });
 
-  it("cada amenaza trae movimientos/ítems/habilidades con % reales", () => {
-    for (const t of meta.topThreats("M-B")) {
+  it("cada amenaza trae movimientos/ítems/habilidades con % reales", async () => {
+    for (const t of await meta.topThreats("M-B")) {
       expect(t.moves.length).toBeGreaterThan(0);
       expect(t.items.length).toBeGreaterThan(0);
       expect(t.abilities.length).toBeGreaterThan(0);
@@ -27,18 +27,18 @@ describe("StaticMetaAdapter (datos reales de torneos Reg M-B)", () => {
     }
   });
 
-  it("usage encuentra por nombre (case-insensitive)", () => {
-    const s = meta.usage("sinistcha", "M-B");
+  it("usage encuentra por nombre (case-insensitive)", async () => {
+    const s = await meta.usage("sinistcha", "M-B");
     expect(s?.pokemon).toBe("Sinistcha");
     expect(s?.moves.map((m) => m.name)).toContain("Rage Powder");
   });
 
-  it("usage devuelve null para Pokémon sin datos (Amoonguss no está en Champions)", () => {
-    expect(meta.usage("Amoonguss", "M-B")).toBeNull();
-    expect(meta.usage("Vileplume", "M-B")).toBeNull(); // legal pero fuera del top
+  it("usage devuelve null para Pokémon sin datos (Amoonguss no está en Champions)", async () => {
+    expect(await meta.usage("Amoonguss", "M-B")).toBeNull();
+    expect(await meta.usage("Vileplume", "M-B")).toBeNull(); // legal pero fuera del top
   });
 
-  it("una regulación sin datos devuelve lista vacía", () => {
-    expect(meta.topThreats("Z-Z")).toEqual([]);
+  it("una regulación sin datos devuelve lista vacía", async () => {
+    expect(await meta.topThreats("Z-Z")).toEqual([]);
   });
 });

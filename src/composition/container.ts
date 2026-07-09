@@ -1,3 +1,4 @@
+import { PgMetaAdapter } from "@/adapters/postgres/pgMetaAdapter";
 import { PgTournamentStore } from "@/adapters/postgres/pgTournamentStore";
 import { PkmnPokedexAdapter } from "@/adapters/pkmn/pkmnPokedexAdapter";
 import { SmogonDamageCalcAdapter } from "@/adapters/smogon/smogonDamageCalcAdapter";
@@ -34,8 +35,15 @@ export function getContainer(): Container {
   if (!instance) {
     const pokedex = new PkmnPokedexAdapter();
     const regulations = new StaticRegulationData();
-    const meta = new StaticMetaAdapter();
     const damage = new SmogonDamageCalcAdapter();
+
+    // Meta vivo: usage_stats de la DB (lo recalcula la ingesta de la Fase 5),
+    // con el dataset estático como respaldo si no hay DB o aún no hay datos.
+    const staticMeta = new StaticMetaAdapter();
+    const databaseUrl = process.env.DATABASE_URL;
+    const meta: MetaUsagePort = databaseUrl
+      ? new PgMetaAdapter(databaseUrl, { fallback: staticMeta })
+      : staticMeta;
 
     const legality = new LegalityService(pokedex, regulations);
     const evOptimizer = new EVOptimizer(pokedex, damage);

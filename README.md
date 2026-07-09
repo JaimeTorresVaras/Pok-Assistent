@@ -125,6 +125,24 @@ Crear un **servicio nuevo del mismo repo** en Railway con:
 
 El proceso corre, termina y Railway lo agenda de nuevo — sin timeouts serverless.
 
+## Meta vivo en la UI
+
+`MetaUsagePort` es asíncrono y en producción lo sirve **`PgMetaAdapter`**
+(lee `usage_stats`, la tabla que recalcula la ingesta): el panel de amenazas
+y las recomendaciones usan el meta real de torneos, ponderado por recencia.
+Detalles:
+
+- **Caché en memoria** por regulación (TTL 5 min): el usage solo cambia
+  cuando corre el cron, así que no se golpea la DB en cada render.
+- **Fallback al dataset estático** (`StaticMetaAdapter`) si no hay
+  `DATABASE_URL`, la DB falla o aún no tiene datos — la app nunca queda en
+  blanco.
+- La página principal es **dinámica** (`dynamic = "force-dynamic"`): se
+  renderiza por petición en lugar de congelar el meta en el build.
+- Los spreads de torneos traen **naturaleza real** pero EVs vacíos (Champions
+  no los publica): la recomendación usa esa naturaleza y deriva los EVs de
+  las stats base, declarándolo en el razonamiento.
+
 ## Estado
 
 ✅ Fases 0–3 + **Fase 7 (primer corte)** con **datos reales de la Reg. M-B**:
@@ -135,16 +153,23 @@ El proceso corre, termina y Railway lo agenda de nuevo — sin timeouts serverle
   (cada JSON registra fuente y fecha).
 
 ⚠️ Limitaciones conocidas (documentadas en el código):
-- Las fuentes públicas no exponen spreads de EVs/naturalezas de Champions → el spread
-  se deriva de las stats base y se declara como genérico en el razonamiento.
+- Champions no publica EVs en teamsheets → la naturaleza es real (de torneos)
+  pero los EVs se derivan de las stats base y se declaran como genéricos en el
+  razonamiento.
 - Los learnsets vienen de los juegos principales vía `@pkmn`; el movepool exacto de
   Champions puede diferir. Las megas exclusivas de Champions (p. ej. Mega Staraptor)
   aún no existen en `@pkmn`/`@smogon/calc` y se saltan en los benchmarks.
-- Dataset manual: la ingesta automática de torneos llega en la Fase 5.
+✅ **Fase 4**: esquema Postgres+pgvector en **Railway**, adaptadores
+Voyage/Postgres y retrieval por similitud.
 
-✅ **Fase 4 (código)**: esquema Postgres+pgvector, adaptadores Voyage/Postgres y
-retrieval por similitud — pendiente solo de credenciales de Railway/Voyage (ver
-sección Fase 4). Hosting decidido: **Railway** (app + DB + cron).
+✅ **Fase 5**: ingesta automática de torneos (Pikalytics/Limitless) con usage
+ponderado por recencia — 8 torneos reales ingeridos (523 docs/vectores,
+105 Pokémon con naturalezas de torneo).
 
-Siguiente: Fase 5 (ingesta de torneos que puebla el RAG) y Fase 6 (AIAdvisor
-con Claude vía `AdvisorPort`). Ver [PLAN.md §8](./PLAN.md).
+✅ **Meta vivo**: la UI y las recomendaciones leen `usage_stats` de la DB vía
+`PgMetaAdapter` (con fallback estático); el dataset de
+`src/adapters/static/data/` queda solo como respaldo.
+
+Siguiente: Fase 6 (AIAdvisor con Claude vía `AdvisorPort`, requiere
+`ANTHROPIC_API_KEY`) y Fase 8 (deploy en Railway: web + cron). Ver
+[PLAN.md §8](./PLAN.md).

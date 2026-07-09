@@ -7,6 +7,9 @@ import { StaticRegulationData } from "@/adapters/static/staticRegulationData";
 import { LegalityService } from "@/core/usecases/legality";
 import { IllegalTeamError, RecommendTeamUseCase } from "@/core/usecases/recommendTeam";
 
+import type { ThreatMon } from "@/core/domain/model";
+import type { MetaUsagePort } from "@/core/ports/metaUsagePort";
+
 const pokedex = new PkmnPokedexAdapter();
 const meta = new StaticMetaAdapter();
 const calc = new SmogonDamageCalcAdapter();
@@ -46,6 +49,33 @@ describe("RecommendTeamUseCase (datos reales M-B)", () => {
     }
     // Sinistcha (amenaza #2 real) debe aparecer en algún benchmark.
     expect(rec.benchmarks.some((b) => b.goal.includes("Sinistcha"))).toBe(true);
+  });
+
+  it("spread de torneo sin EVs públicos: usa la naturaleza real y deriva los EVs", async () => {
+    // Forma real de los spreads de la DB (Fase 5): naturaleza de torneo, evs "".
+    const threat: ThreatMon = {
+      regulation: "M-B",
+      pokemon: "Garchomp",
+      usagePct: 46.8,
+      winratePct: 66.2,
+      moves: [{ name: "Dragon Claw", pct: 95.2 }],
+      items: [{ name: "Life Orb", pct: 61 }],
+      abilities: [{ name: "Rough Skin", pct: 100 }],
+      spreads: [{ nature: "Jolly", evs: "", pct: 80.3 }],
+      teraTypes: [],
+    };
+    const liveMeta: MetaUsagePort = {
+      topThreats: async () => [threat],
+      usage: async (pokemon) => (pokemon === "Garchomp" ? threat : null),
+    };
+    const live = new RecommendTeamUseCase({ pokedex, meta: liveMeta, calc, legality });
+    const [rec] = await live.exec(["Garchomp"], "M-B");
+
+    expect(rec.recommended.nature).toBe("Jolly"); // real, del spread de torneo
+    expect(rec.recommended.evs.atk).toBe(252); // derivado, no vacío
+    expect(rec.recommended.evs.spe).toBe(252);
+    expect(rec.reasoning).toContain("naturaleza Jolly");
+    expect(rec.reasoning).not.toContain('spread ""');
   });
 
   it("legal pero fuera del top: spread genérico según su stat de ataque mayor", async () => {

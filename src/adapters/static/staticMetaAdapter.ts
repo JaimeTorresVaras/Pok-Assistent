@@ -40,13 +40,13 @@ const THREATS_BY_REG: Record<string, ThreatMon[]> = {
 };
 
 export class StaticMetaAdapter implements MetaUsagePort {
-  topThreats(regulation: Regulation, limit = 30): ThreatMon[] {
+  async topThreats(regulation: Regulation, limit = 30): Promise<ThreatMon[]> {
     return [...(THREATS_BY_REG[regulation] ?? [])]
       .sort((a, b) => b.usagePct - a.usagePct)
       .slice(0, limit);
   }
 
-  usage(pokemon: string, regulation: Regulation): ThreatMon | null {
+  async usage(pokemon: string, regulation: Regulation): Promise<ThreatMon | null> {
     const target = pokemon.toLowerCase();
     return (
       (THREATS_BY_REG[regulation] ?? []).find((t) => t.pokemon.toLowerCase() === target) ?? null

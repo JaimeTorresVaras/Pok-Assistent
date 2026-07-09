@@ -53,7 +53,7 @@ export class RecommendTeamUseCase {
     const illegal = team.filter((mon) => !this.deps.legality.isLegal(mon, regulation));
     if (illegal.length > 0) throw new IllegalTeamError(illegal, regulation);
 
-    const threats = this.deps.meta.topThreats(regulation, 10);
+    const threats = await this.deps.meta.topThreats(regulation, 10);
     return Promise.all(team.map((mon) => this.recommendOne(mon, regulation, threats)));
   }
 
@@ -64,7 +64,7 @@ export class RecommendTeamUseCase {
   ): Promise<Recommendation> {
     // Legalidad ya validada => la especie existe.
     const species = this.deps.pokedex.getSpecies(pokemon)!;
-    const usage = this.deps.meta.usage(species.name, regulation);
+    const usage = await this.deps.meta.usage(species.name, regulation);
 
     const partial = usage ? fromUsage(species, usage) : fallbackSet(species, regulation);
 
@@ -171,6 +171,9 @@ function fromUsage(
   const spread = usage.spreads[0];
   const derived = derivedSpread(species);
   const winrate = usage.winratePct != null ? ` y ${usage.winratePct}% de winrate` : "";
+  // Champions no publica EVs: los spreads de torneos traen naturaleza real
+  // pero evs "". La naturaleza se usa siempre; los EVs solo si son reales.
+  const realEvs = spread?.evs ? parseShowdownEvs(spread.evs) : null;
 
   return {
     recommended: {
@@ -178,17 +181,23 @@ function fromUsage(
       item: usage.items[0]?.name ?? "",
       ability: usage.abilities[0]?.name ?? species.abilities[0],
       teraType: usage.teraTypes[0]?.name,
-      evs: spread ? parseShowdownEvs(spread.evs) : derived.evs,
+      evs: realEvs ?? derived.evs,
       moves: usage.moves.slice(0, 4).map((m) => m.name),
     },
-    reasoning: spread
+    reasoning: realEvs
       ? `Set más usado del meta (${usage.usagePct}% de uso${winrate}): spread "${spread.evs}" ` +
         `(${spread.pct}% de los ${usage.pokemon}), con el ítem y los movimientos de mayor ` +
         `frecuencia real. El razonamiento fino (objetivos priorizados por IA) llega en la Fase 6.`
-      : `Datos reales del meta (${usage.usagePct}% de uso${winrate}): ítem, habilidad y ` +
-        `movimientos por frecuencia real en torneos. El spread es genérico ${derived.label}, ` +
-        `derivado de sus stats base — las fuentes públicas aún no exponen spreads de Champions; ` +
-        `la ingesta de torneos (Fase 5) y la IA (Fase 6) lo refinarán.`,
+      : spread
+        ? `Datos reales de torneos (${usage.usagePct}% de uso${winrate}): naturaleza ` +
+          `${spread.nature} (${spread.pct}% de los ${usage.pokemon}), con el ítem, la habilidad ` +
+          `y los movimientos de mayor frecuencia real. Los EVs son genéricos ${derived.label}, ` +
+          `derivados de sus stats base — Champions no publica spreads de EVs; la IA (Fase 6) ` +
+          `los refinará.`
+        : `Datos reales del meta (${usage.usagePct}% de uso${winrate}): ítem, habilidad y ` +
+          `movimientos por frecuencia real en torneos. El spread es genérico ${derived.label}, ` +
+          `derivado de sus stats base — las fuentes públicas aún no exponen spreads de Champions; ` +
+          `la ingesta de torneos (Fase 5) y la IA (Fase 6) lo refinarán.`,
     metaMoves: usage.moves.map((m) => `${m.name} ${m.pct}%`),
   };
 }

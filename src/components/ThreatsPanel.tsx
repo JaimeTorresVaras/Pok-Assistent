@@ -41,8 +41,8 @@ export function ThreatsPanel({ threats }: Props) {
         </ul>
       )}
       <p className="mt-4 border-t border-neutral-200 pt-3 text-[11px] leading-relaxed text-neutral-400 dark:border-neutral-800">
-        Datos reales: Pikalytics — torneos Reg M-B (Limitless), jul 2026. Dataset manual por ahora;
-        la ingesta automática (Fase 5) lo mantendrá al día.
+        Datos reales de torneos (Pikalytics/Limitless), ponderados por recencia y recalculados
+        automáticamente con cada ingesta.
       </p>
     </aside>
   );

@@ -4,10 +4,16 @@ import { getContainer } from "@/composition/container";
 /** Regulación activa (parametrizable; ver PLAN.md §0). */
 const REGULATION = "M-B";
 
-export default function Home() {
+/**
+ * El top del meta sale de la DB (usage_stats, recalculado por la ingesta),
+ * así que la página se renderiza por petición en vez de congelarse en build.
+ */
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
   const container = getContainer();
   const legalMons = container.legality.listLegal(REGULATION);
-  const threats = container.meta.topThreats(REGULATION, 10);
+  const threats = await container.meta.topThreats(REGULATION, 10);
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
