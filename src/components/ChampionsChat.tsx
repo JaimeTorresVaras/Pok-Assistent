@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { MetaTopCard } from "@/components/MetaTopCard";
 import { PartySidebar } from "@/components/PartySidebar";
 import { PixelSprite } from "@/components/PixelSprite";
 import { RecommendationCard } from "@/components/RecommendationCard";
+import { SideNav } from "@/components/SideNav";
 import { UsageCard } from "@/components/UsageCard";
+import {
+  addHistoryEntry,
+  clearHistoryEntries,
+  formatWhen,
+  getHistorySnapshot,
+  getServerHistorySnapshot,
+  newEntry,
+  subscribeHistory,
+  type TeamAnalysis,
+} from "@/components/history";
 import { recommendationToShowdown } from "@/components/showdown";
 import { toID } from "@/core/domain/ids";
 import type { Recommendation, ThreatMon } from "@/core/domain/model";
@@ -46,6 +57,12 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  // Historial en localStorage vía store externo (SSR: vacío; cliente: hidrata).
+  const history = useSyncExternalStore(
+    subscribeHistory,
+    getHistorySnapshot,
+    getServerHistorySnapshot,
+  );
   const nextId = useRef(1);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +93,8 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
           `con benchmarks contra el top del meta. Los ✓ los verificó el motor de daño.`,
         recommendations: data.recommendations,
       });
+      // Guardar en el historial (izquierda), persistido en el navegador.
+      addHistoryEntry(newEntry(team, data.recommendations));
     } catch (err) {
       push({
         role: "assistant",
@@ -161,6 +180,21 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
     await navigator.clipboard.writeText(recs.map(recommendationToShowdown).join("\n\n"));
   }
 
+  /** Recupera un análisis del historial: restaura el equipo y lo re-muestra. */
+  function restore(entry: TeamAnalysis) {
+    if (loading) return;
+    setTeam(entry.team.slice(0, 6));
+    push({
+      role: "assistant",
+      text: `Bzzt: del historial (${formatWhen(entry.at)}). Restauré el equipo en las casillas.`,
+      recommendations: entry.recommendations,
+    });
+  }
+
+  function clearHistory() {
+    clearHistoryEntries();
+  }
+
   // La guía de bienvenida se oculta en cuanto el usuario escribe algo.
   const hasUserMessage = messages.some((m) => m.role === "user");
 
@@ -172,8 +206,18 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
 
   return (
     <div className="flex flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row">
+      <SideNav
+        history={history}
+        disabled={loading}
+        canAnalyze={team.length > 0}
+        onSelectEntry={restore}
+        onClearHistory={clearHistory}
+        onAnalyze={analyze}
+        onMeta={() => send("¿Cómo está el meta?")}
+      />
+
       {/* Chat: en escritorio llena el alto disponible y solo él scrollea */}
-      <section className="game-box flex min-w-0 flex-1 flex-col lg:min-h-0">
+      <section className="game-box order-1 flex min-w-0 flex-1 flex-col lg:order-none lg:min-h-0">
         <header className="flex items-center gap-2 border-b-2 border-ink px-4 py-2.5">
           <PixelSprite pokemon="Rotom" size={28} />
           <span className="font-pixel text-[10px] uppercase">{ASSISTANT_NAME}</span>

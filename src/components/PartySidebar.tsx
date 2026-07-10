@@ -44,7 +44,7 @@ export function PartySidebar({ legalMons, team, disabled, onAdd, onRemove, onAna
   // Sin scroll propio: la caja se estira al alto de la columna y las
   // casillas se reparten el espacio sobrante (como el menú de party).
   return (
-    <aside className="flex w-full flex-col lg:h-full lg:min-h-0 lg:w-[272px]">
+    <aside className="order-2 flex w-full flex-col lg:order-none lg:h-full lg:min-h-0 lg:w-[272px]">
       <div className="game-box flex flex-col p-3 lg:min-h-0 lg:flex-1">
         <h2 className="font-pixel mb-2 text-[10px] tracking-wide uppercase">
           Tu equipo <span className="text-poke-red">{team.length}</span>/{MAX_TEAM}
