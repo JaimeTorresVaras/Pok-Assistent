@@ -207,29 +207,21 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
 
   return (
     <div className="flex flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row">
-      {navOpen && (
-        <SideNav
-          history={history}
-          disabled={loading}
-          canAnalyze={team.length > 0}
-          onSelectEntry={restore}
-          onClearHistory={clearHistory}
-          onAnalyze={analyze}
-          onMeta={() => send("¿Cómo está el meta?")}
-        />
-      )}
+      <SideNav
+        open={navOpen}
+        onToggle={() => setNavOpen((v) => !v)}
+        history={history}
+        disabled={loading}
+        canAnalyze={team.length > 0}
+        onSelectEntry={restore}
+        onClearHistory={clearHistory}
+        onAnalyze={analyze}
+        onMeta={() => send("¿Cómo está el meta?")}
+      />
 
       {/* Chat: en escritorio llena el alto disponible y solo él scrollea */}
       <section className="game-box order-1 flex min-w-0 flex-1 flex-col lg:order-none lg:min-h-0">
         <header className="flex items-center gap-2 border-b-2 border-ink px-4 py-2.5">
-          <button
-            type="button"
-            onClick={() => setNavOpen((v) => !v)}
-            title={navOpen ? "Ocultar historial y funciones" : "Mostrar historial y funciones"}
-            className="game-btn font-pixel mr-1 bg-panel-2 px-2 py-1.5 text-[9px]"
-          >
-            {navOpen ? "◀" : "▶"}
-          </button>
           <PixelSprite pokemon="Rotom" size={28} />
           <span className="font-pixel text-[10px] uppercase">{ASSISTANT_NAME}</span>
           <span className="ml-auto flex items-center gap-1.5 text-[10px] text-muted">
