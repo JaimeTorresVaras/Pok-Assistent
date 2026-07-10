@@ -41,11 +41,7 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
     {
       id: 0,
       role: "assistant",
-      text:
-        `¡Bzzt! Soy ${ASSISTANT_NAME}, tu asistente de la Reg. ${regulation}. Arma tu equipo en ` +
-        `las casillas de la derecha y pídeme el análisis: te doy spreads, ítems y movimientos ` +
-        `con datos reales de torneos, y cada número lo verifica el motor de daño. También puedo ` +
-        `mostrarte el top del meta o la ficha de cualquier Pokémon.`,
+      text: `¡Bzzt! Soy ${ASSISTANT_NAME}, tu asistente de la Reg. ${regulation}. ¿Por dónde partimos?`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -165,6 +161,9 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
     await navigator.clipboard.writeText(recs.map(recommendationToShowdown).join("\n\n"));
   }
 
+  // La guía de bienvenida se oculta en cuanto el usuario escribe algo.
+  const hasUserMessage = messages.some((m) => m.role === "user");
+
   const chips = [
     { label: "Top del meta", send: "¿Cómo está el meta?" },
     ...(threats[0] ? [{ label: `Ficha de ${threats[0].pokemon}`, send: threats[0].pokemon }] : []),
@@ -188,6 +187,17 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
           ref={scrollRef}
           className="flex h-[480px] flex-col gap-4 overflow-y-auto p-4 lg:h-auto lg:min-h-0 lg:flex-1"
         >
+          {!hasUserMessage && (
+            <div className="game-inset bg-panel p-3.5 text-sm leading-relaxed text-muted">
+              <p className="font-pixel mb-2 text-[9px] text-ink uppercase">¿Para qué sirve?</p>
+              <p>
+                Arma tu equipo (hasta 6) en las casillas de la derecha y pide el análisis: recibes
+                spreads de EVs, ítems y movimientos contra el meta real de torneos — cada número lo
+                verifica el motor de daño, nunca se inventa. También puedes pedir el top del meta o
+                la ficha de cualquier Pokémon escribiendo su nombre.
+              </p>
+            </div>
+          )}
           {messages.map((msg) =>
             msg.role === "user" ? (
               <div key={msg.id} className="flex justify-end">

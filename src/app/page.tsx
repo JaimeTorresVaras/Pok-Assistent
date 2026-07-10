@@ -18,18 +18,15 @@ export default async function Home() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-6 lg:min-h-0">
-      <header className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <h1 className="font-pixel text-base tracking-tight sm:text-lg">
+      {/* Header en una línea: la descripción vive dentro del chat. */}
+      <header className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <h1 className="font-pixel text-sm tracking-tight sm:text-base">
           Champions <span className="text-poke-red">EV</span>{" "}
           <span className="text-poke-blue">AI</span>
         </h1>
         <span className="game-inset px-2.5 py-1 text-[10px] font-semibold uppercase">
           Reg. {REGULATION} · VGC dobles
         </span>
-        <p className="w-full max-w-2xl text-sm leading-relaxed text-muted">
-          Arma tu equipo, chatea con el asistente y recibe sets contra el meta real de torneos —
-          cada número verificado por el motor de daño, nunca inventado.
-        </p>
       </header>
 
       <ChampionsChat regulation={REGULATION} legalMons={legalMons} threats={threats} />
