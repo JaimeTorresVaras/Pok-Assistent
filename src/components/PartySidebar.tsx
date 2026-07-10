@@ -41,17 +41,17 @@ export function PartySidebar({ legalMons, team, disabled, onAdd, onRemove, onAna
     inputRef.current?.focus();
   }
 
-  // Si la ventana es muy baja, la party scrollea por dentro (nunca la página).
-  // El padding derecho/inferior evita que el overflow recorte la sombra dura.
+  // Sin scroll propio: la caja se estira al alto de la columna y las
+  // casillas se reparten el espacio sobrante (como el menú de party).
   return (
-    <aside className="flex w-full flex-col gap-3 lg:min-h-0 lg:w-[272px] lg:overflow-y-auto lg:pr-1.5 lg:pb-1.5">
-      <div className="game-box p-3">
-        <h2 className="font-pixel mb-3 text-[10px] tracking-wide uppercase">
+    <aside className="flex w-full flex-col lg:h-full lg:min-h-0 lg:w-[272px]">
+      <div className="game-box flex flex-col p-3 lg:min-h-0 lg:flex-1">
+        <h2 className="font-pixel mb-2 text-[10px] tracking-wide uppercase">
           Tu equipo <span className="text-poke-red">{team.length}</span>/{MAX_TEAM}
         </h2>
 
         {/* Buscador con sugerencias */}
-        <div className="relative mb-3">
+        <div className="relative mb-2">
           <input
             ref={inputRef}
             type="search"
@@ -90,14 +90,14 @@ export function PartySidebar({ legalMons, team, disabled, onAdd, onRemove, onAna
         </div>
 
         {/* Las 6 casillas */}
-        <ul className="space-y-2">
+        <ul className="flex flex-col gap-1.5 lg:min-h-0 lg:flex-1 lg:justify-evenly">
           {Array.from({ length: MAX_TEAM }, (_, i) => {
             const mon = team[i];
             return (
               <li key={i}>
                 {mon ? (
-                  <div className="game-inset flex items-center gap-2 bg-panel py-1 pr-2 pl-1">
-                    <PixelSprite pokemon={mon} size={44} className="shrink-0" />
+                  <div className="game-inset flex items-center gap-2 bg-panel py-0.5 pr-2 pl-1">
+                    <PixelSprite pokemon={mon} size={40} className="shrink-0" />
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold">{mon}</span>
                     <button
                       type="button"
@@ -109,8 +109,8 @@ export function PartySidebar({ legalMons, team, disabled, onAdd, onRemove, onAna
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 rounded border-2 border-dashed border-muted/50 py-1 pr-2 pl-1 text-muted">
-                    <svg viewBox="0 0 24 24" width={44} height={44} className="opacity-30">
+                  <div className="flex items-center gap-2 rounded border-2 border-dashed border-muted/50 py-0.5 pr-2 pl-1 text-muted">
+                    <svg viewBox="0 0 24 24" width={40} height={40} className="opacity-30">
                       <circle
                         cx="12"
                         cy="12"
@@ -134,15 +134,15 @@ export function PartySidebar({ legalMons, team, disabled, onAdd, onRemove, onAna
           type="button"
           onClick={onAnalyze}
           disabled={team.length === 0 || disabled}
-          className="game-btn font-pixel mt-3 w-full bg-poke-red px-3 py-3 text-[10px] text-white uppercase"
+          className="game-btn font-pixel mt-2.5 w-full bg-poke-red px-3 py-3 text-[10px] text-white uppercase"
         >
           {disabled ? "Calculando…" : "Analizar equipo"}
         </button>
-      </div>
 
-      <p className="px-1 text-[11px] leading-relaxed text-muted">
-        Roster legal de la Reg. M-B ({legalMons.length} especies). Sprites: Pokémon Showdown.
-      </p>
+        <p className="mt-2 text-center text-[10px] leading-tight text-muted">
+          {legalMons.length} especies legales · sprites: Showdown
+        </p>
+      </div>
     </aside>
   );
 }
