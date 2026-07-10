@@ -172,9 +172,9 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
   ];
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-      {/* Chat */}
-      <section className="game-box flex min-w-0 flex-1 flex-col">
+    <div className="flex flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row">
+      {/* Chat: en escritorio llena el alto disponible y solo él scrollea */}
+      <section className="game-box flex min-w-0 flex-1 flex-col lg:min-h-0">
         <header className="flex items-center gap-2 border-b-2 border-ink px-4 py-2.5">
           <PixelSprite pokemon="Rotom" size={28} />
           <span className="font-pixel text-[10px] uppercase">{ASSISTANT_NAME}</span>
@@ -184,7 +184,10 @@ export function ChampionsChat({ regulation, legalMons, threats }: Props) {
           </span>
         </header>
 
-        <div ref={scrollRef} className="flex h-[560px] flex-col gap-4 overflow-y-auto p-4">
+        <div
+          ref={scrollRef}
+          className="flex h-[480px] flex-col gap-4 overflow-y-auto p-4 lg:h-auto lg:min-h-0 lg:flex-1"
+        >
           {messages.map((msg) =>
             msg.role === "user" ? (
               <div key={msg.id} className="flex justify-end">

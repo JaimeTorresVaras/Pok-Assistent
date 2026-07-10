@@ -17,8 +17,8 @@ export default async function Home() {
   const threats = await container.meta.topThreats(REGULATION, 40);
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
-      <header className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-6 lg:min-h-0">
+      <header className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
         <h1 className="font-pixel text-base tracking-tight sm:text-lg">
           Champions <span className="text-poke-red">EV</span>{" "}
           <span className="text-poke-blue">AI</span>

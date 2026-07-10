@@ -41,8 +41,10 @@ export function PartySidebar({ legalMons, team, disabled, onAdd, onRemove, onAna
     inputRef.current?.focus();
   }
 
+  // Si la ventana es muy baja, la party scrollea por dentro (nunca la página).
+  // El padding derecho/inferior evita que el overflow recorte la sombra dura.
   return (
-    <aside className="flex w-full flex-col gap-3 lg:w-[264px]">
+    <aside className="flex w-full flex-col gap-3 lg:min-h-0 lg:w-[272px] lg:overflow-y-auto lg:pr-1.5 lg:pb-1.5">
       <div className="game-box p-3">
         <h2 className="font-pixel mb-3 text-[10px] tracking-wide uppercase">
           Tu equipo <span className="text-poke-red">{team.length}</span>/{MAX_TEAM}

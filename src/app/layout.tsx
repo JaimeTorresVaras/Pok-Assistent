@@ -35,7 +35,8 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} ${pressStart.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      {/* En escritorio la app ocupa la ventana y solo el chat scrollea. */}
+      <body className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">{children}</body>
     </html>
   );
 }
