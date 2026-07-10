@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
+/*
+ * Tema "guía de entrenador retro": papel crema en claro, azul noche en
+ * oscuro, acentos Pokéball. Los componentes usan las utilidades generadas
+ * por @theme (bg-paper, text-ink, border-ink, bg-poke-red, ...) para no
+ * repetir variantes dark: en cada clase.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --paper: #f1ead9;
+  --panel: #fbf7ec;
+  --panel-2: #ece4cf;
+  --ink: #2b2620;
+  --muted: #877d6a;
+  --poke-red: #d8362a;
+  --poke-yellow: #f5c518;
+  --poke-blue: #2a75bb;
+  --poke-green: #3a9d5d;
+  --hard-shadow: #2b2620;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #14161f;
+    --panel: #1d2130;
+    --panel-2: #262b3f;
+    --ink: #ece7da;
+    --muted: #98a0b5;
+    --hard-shadow: #05060a;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-poke-red: var(--poke-red);
+  --color-poke-yellow: var(--poke-yellow);
+  --color-poke-blue: var(--poke-blue);
+  --color-poke-green: var(--poke-green);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-pixel: var(--font-press-start);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--paper);
+  /* Trama de puntos sutil, como papel cuadriculado de guía de juego. */
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--ink) 8%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 18px 18px;
+  color: var(--ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Los sprites de Showdown se escalan sin suavizado (pixel art). */
+.pixelated {
+  image-rendering: pixelated;
+}
+
+/* Caja estilo diálogo de juego: borde sólido + sombra dura sin desenfoque. */
+.game-box {
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 0 var(--hard-shadow);
+}
+
+/* Variante hundida (inputs, barras): sin sombra externa. */
+.game-inset {
+  background: var(--panel-2);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+}
+
+/* Botón principal: se "presiona" moviéndose hacia la sombra. */
+.game-btn {
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 3px 3px 0 0 var(--hard-shadow);
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease;
+}
+.game-btn:hover:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 0 var(--hard-shadow);
+}
+.game-btn:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 0 var(--hard-shadow);
+}
+.game-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Indicador "escribiendo…" del chat (tres puntos pixel). */
+@keyframes blink-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.typing-dot {
+  animation: blink-dot 1.2s infinite;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
 }

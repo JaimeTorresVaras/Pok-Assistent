@@ -145,7 +145,7 @@ Detalles:
 
 ## Estado
 
-✅ Fases 0–3 + **Fase 7 (primer corte)** con **datos reales de la Reg. M-B**:
+✅ Fases 0–3 con **datos reales de la Reg. M-B**:
 - Allowlist real: roster completo de Champions (209 especies, Bulbapedia); megas y
   formas aceptadas vía especie base (p. ej. Charizard-Mega-Y).
 - Meta real: top 12 de uso de torneos (Pikalytics/Limitless, jul 2026) con % reales
@@ -169,6 +169,13 @@ ponderado por recencia — 8 torneos reales ingeridos (523 docs/vectores,
 ✅ **Meta vivo**: la UI y las recomendaciones leen `usage_stats` de la DB vía
 `PgMetaAdapter` (con fallback estático); el dataset de
 `src/adapters/static/data/` queda solo como respaldo.
+
+✅ **Fase 7 (UI de chat)**: interfaz de chat con el asistente «Rotom-Dex» +
+party de 6 casillas con sprites pixel art (gen 5, CDN de Showdown vía
+`@pkmn/img`), estética retro de guía de juego (fuente pixel, cajas de
+diálogo, sombras duras). Las respuestas de texto libre hoy son
+deterministas (analizar equipo / top del meta / ficha por Pokémon); en la
+Fase 6 el `AdvisorPort` (Claude) tomará el texto libre sin cambiar la UI.
 
 Siguiente: Fase 6 (AIAdvisor con Claude vía `AdvisorPort`, requiere
 `ANTHROPIC_API_KEY`) y Fase 8 (deploy en Railway: web + cron). Ver

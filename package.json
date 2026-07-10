@@ -19,6 +19,7 @@
   "dependencies": {
     "@pkmn/data": "^0.10.11",
     "@pkmn/dex": "^0.10.11",
+    "@pkmn/img": "^0.3.4",
     "@smogon/calc": "^0.11.0",
     "next": "16.2.10",
     "postgres": "^3.4.9",
